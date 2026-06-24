@@ -337,10 +337,10 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
 function fitScreen() {
   const app = document.getElementById('app');
   const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
-  app.style.transform = `scale(${s})`;
-  app.style.transformOrigin = 'top left';
-  app.style.left = ((window.innerWidth  - 1920 * s) / 2) + 'px';
-  app.style.top  = ((window.innerHeight - 1080 * s) / 2) + 'px';
+  app.style.transform = `translate(-50%, -50%) scale(${s})`;
+  app.style.transformOrigin = 'center center';
+  app.style.left = '50%';
+  app.style.top  = '50%';
 }
 window.addEventListener('load',   fitScreen);
 window.addEventListener('resize', fitScreen);
