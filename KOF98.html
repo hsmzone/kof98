@@ -666,20 +666,24 @@ document.getElementById('name-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') document.getElementById('btn-name-ok').click();
 });
 document.getElementById('btn-save').addEventListener('click', () => {
-  const app = document.getElementById('app');
-  const target = document.getElementById('screen-result');
-  // 캡처 전: transform 제거해서 1920×1080 원본 크기로 복원
-  const prevTransform = app.style.transform;
-  const prevLeft = app.style.left;
-  const prevTop  = app.style.top;
-  app.style.transform = 'none';
-  app.style.left = '0';
-  app.style.top  = '0';
-  html2canvas(target, { scale:1, useCORS:true, backgroundColor:'#0a0a1a' }).then(canvas => {
-    // 캡처 후: transform 복원
-    app.style.transform = prevTransform;
-    app.style.left = prevLeft;
-    app.style.top  = prevTop;
+  const source = document.getElementById('screen-result');
+  // 원본 크기(1920×1080) 숨김 컨테이너에 복제해서 캡처
+  const wrapper = document.createElement('div');
+  wrapper.style.cssText = 'position:fixed;left:-9999px;top:0;width:1920px;height:1080px;overflow:hidden;pointer-events:none;';
+  const clone = source.cloneNode(true);
+  clone.style.cssText = 'display:flex;flex-direction:column;width:1920px;height:1080px;position:relative;';
+  wrapper.appendChild(clone);
+  document.body.appendChild(wrapper);
+  html2canvas(clone, {
+    scale: 1,
+    useCORS: true,
+    backgroundColor: '#0a0a1a',
+    width: 1920,
+    height: 1080,
+    windowWidth: 1920,
+    windowHeight: 1080,
+  }).then(canvas => {
+    document.body.removeChild(wrapper);
     const a = document.createElement('a');
     a.download = `KOF98_${playerName}_draft.png`;
     a.href = canvas.toDataURL('image/png');
