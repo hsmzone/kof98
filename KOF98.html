@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KOF98</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:100%; height:100%; background:#000; overflow:hidden; }
+
+#app {
+  width:1920px; height:1080px;
+  position:absolute;
+  background: linear-gradient(160deg, #050020 0%, #180018 45%, #280008 100%);
+  font-family:'Malgun Gothic',sans-serif;
+  color:#fff;
+  user-select:none;
+  overflow:hidden;
+}
+.screen {
+  width:1920px; height:1080px;
+  display:none; position:absolute; top:0; left:0;
+}
+.screen.active { display:flex; flex-direction:column; }
+
+/* ══ 화면1: 이름입력 ══ */
+#screen-name {
+  align-items:center;
+  justify-content:flex-end;
+  background: url('Title.png') center center / auto 100% no-repeat,
+              linear-gradient(160deg, #050020, #280008);
+  padding-bottom:90px;
+}
+#name-input {
+  font-size:36px; padding:18px 36px;
+  border:3px solid #f0c040;
+  background:#111130; color:#fff;
+  border-radius:8px; outline:none;
+  width:500px; text-align:center;
+}
+#name-input:focus { border-color:#fff; box-shadow:0 0 16px #f0c040; }
+#btn-name-ok {
+  margin-top:32px;
+  font-size:32px; padding:16px 80px;
+  background:#f0c040; color:#000;
+  border:none; border-radius:8px;
+  cursor:pointer; font-weight:bold;
+}
+#btn-name-ok:hover { background:#ffe080; }
+
+/* ══ 화면2: 캐릭터 선택 ══ */
+#screen-select {
+  background: linear-gradient(160deg, #050020 0%, #180018 45%, #280008 100%);
+}
+
+/* 헤더 */
+#sel-header {
+  height:48px; flex-shrink:0;
+  display:flex; align-items:center;
+  justify-content:space-between;
+  padding:0 50px;
+  background:#00000088;
+  border-bottom:2px solid #f0c04055;
+}
+.h-title  { font-size:22px; color:#f0c040; font-weight:bold; letter-spacing:2px; }
+.h-team   { font-size:20px; color:#aaddff; }
+.h-score  { font-size:20px; }
+.h-score span { color:#f0c040; font-size:26px; font-weight:bold; }
+
+/* 그리드 영역 */
+#grid-area {
+  height:792px; flex-shrink:0;
+  position:relative;
+  padding:0 60px;
+}
+#grid-area::before {
+  content:'K·O·F';
+  position:absolute;
+  top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  font-size:220px; font-weight:900;
+  color:#ffffff08; letter-spacing:20px;
+  pointer-events:none; z-index:0; white-space:nowrap;
+}
+#char-grid {
+  width:100%; height:100%;
+  display:flex; flex-direction:column;
+  justify-content:space-evenly;
+  align-items:center;
+  position:relative; z-index:1;
+  gap:0;
+}
+.char-row {
+  display:flex;
+  justify-content:center;
+  gap:18px;
+}
+
+/* ── 캐릭터 슬롯 ── */
+.char-slot {
+  width:118px; height:132px;
+  position:relative; cursor:pointer; flex-shrink:0;
+}
+.char-slot .char-img {
+  position:absolute; top:7px; left:0;
+  width:118px; height:118px;
+  object-fit:contain; object-position:center;
+  display:block;
+}
+
+/* 셀렉트 프레임 점멸 */
+.char-slot .sf {
+  position:absolute; top:0; left:0;
+  width:118px; height:132px;
+  display:none; pointer-events:none; z-index:2;
+}
+.char-slot .sf1,
+.char-slot .sf2 {
+  position:absolute; top:0; left:0;
+  width:118px; height:132px;
+}
+.char-slot .sf1 { animation: blink1 0.28s step-end infinite; }
+.char-slot .sf2 { animation: blink2 0.28s step-end infinite; }
+@keyframes blink1 { 0%,100%{opacity:1} 50%{opacity:0} }
+@keyframes blink2 { 0%,100%{opacity:0} 50%{opacity:1} }
+
+/* 점수: 왼쪽 하단, 2배 크기, 붙임 */
+.char-slot .score-disp {
+  position:absolute;
+  bottom:0; left:0;
+  display:none;
+  line-height:0;
+  z-index:3;
+  font-size:0;
+}
+.char-slot .score-disp img {
+  height:44px; width:auto;
+  display:inline-block;
+  vertical-align:bottom;
+  margin:0; padding:0;
+}
+
+/* hover: 프레임 + 점수 */
+.char-slot:hover:not(.used):not(.disabled) .sf         { display:block; }
+.char-slot:hover:not(.used):not(.disabled) .score-disp { display:block; }
+/* selected: 점수만 (금 테두리) */
+.char-slot.selected .score-disp { display:block; }
+.char-slot.selected .char-img   { outline:3px solid #f0c040; outline-offset:-1px; }
+/* selected hover: 프레임 없음 유지 */
+.char-slot.selected:hover .sf   { display:none; }
+
+.char-slot.used     { opacity:0.28; cursor:not-allowed; }
+.char-slot.disabled { opacity:0.32; cursor:not-allowed; }
+
+/* ══ 하단 팀 영역 ══ */
+#team-area {
+  flex:1;
+  display:flex;
+  border-top:2px solid #f0c04044;
+  background:#00000055;
+}
+.team-frame {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  padding:10px 16px; gap:8px;
+  border-right:1px solid #ffffff18;
+  position:relative;
+}
+.team-frame:last-child { border-right:none; }
+.team-frame.active-tf {
+  background:#f0c04010;
+  border-top:3px solid #f0c040;
+}
+.team-frame.done-tf {
+  background:#00500010;
+  border-top:3px solid #4a8a4a;
+}
+.tf-top { display:flex; align-items:center; gap:20px; }
+.tf-label { font-size:28px; font-weight:bold; color:#f0c040; }
+.team-frame.done-tf .tf-label { color:#8fef8f; }
+.tf-score { font-size:18px; color:#ccc; }
+.tf-score span { color:#f0c040; font-size:22px; font-weight:bold; }
+.team-frame.done-tf .tf-score span { color:#8fef8f; }
+
+.tf-slots { display:flex; gap:10px; }
+.tf-slot {
+  width:110px; height:116px;
+  border:2px dashed #444; border-radius:4px;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  font-size:20px; color:#444;
+  position:relative; overflow:hidden; flex-shrink:0;
+}
+.tf-slot.filled      { border-color:#f0c040; }
+.tf-slot.filled-done { border-color:#4a8a4a; }
+.tf-slot { overflow:visible; }
+.tf-slot img.tf-char-img {
+  position:absolute; top:0; left:0;
+  width:110px; height:110px;
+  object-fit:contain; object-position:center; display:block;
+}
+.tf-slot .tf-score-disp {
+  position:absolute; bottom:0; left:0;
+  display:flex; gap:0; align-items:flex-end;
+  line-height:0; font-size:0; z-index:2;
+}
+.tf-slot .tf-score-disp img { height:44px; width:auto; display:inline-block; vertical-align:bottom; }
+.tf-slot .tf-remove {
+  position:absolute; top:2px; right:2px;
+  width:18px; height:18px;
+  background:#c00; color:#fff;
+  border:none; border-radius:50%;
+  font-size:11px; cursor:pointer;
+  display:none; line-height:18px; text-align:center;
+}
+.tf-slot:hover .tf-remove { display:block; }
+
+.btn-confirm {
+  font-size:17px; padding:8px 22px;
+  background:#f0c040; color:#000;
+  border:none; border-radius:6px;
+  cursor:pointer; font-weight:bold; white-space:nowrap;
+}
+.btn-confirm:disabled { background:#2a2a2a; color:#555; cursor:not-allowed; }
+.btn-confirm.confirmed { background:#4a8a4a; color:#fff; cursor:default; }
+.btn-confirm:not(:disabled):not(.confirmed):hover { background:#ffe080; }
+
+/* ══ 화면3: 결과 ══ */
+#screen-result {
+  align-items:center; justify-content:center;
+  background:radial-gradient(ellipse at center, #1a1a3a 0%, #0a0a1a 100%);
+  gap:22px; padding:40px 80px;
+}
+#result-name {
+  font-size:48px; color:#f0c040; font-weight:bold;
+  text-shadow:0 0 20px #f0c040aa; letter-spacing:4px;
+}
+.result-team {
+  display:flex; align-items:center; gap:24px;
+  background:#111130cc; border:2px solid #f0c04066;
+  border-radius:12px; padding:16px 40px; width:1000px;
+}
+.rt-label { font-size:28px; color:#aaddff; width:100px; flex-shrink:0; text-align:center; }
+.rt-char  { display:flex; flex-direction:column; align-items:center; gap:6px; }
+.rt-char img { width:130px; height:130px; object-fit:cover; border:3px solid #f0c040; border-radius:4px; }
+.rt-char span { font-size:17px; color:#fff; }
+.rt-plus  { font-size:32px; color:#f0c04077; }
+.rt-total { margin-left:auto; font-size:26px; color:#f0c040; font-weight:bold; }
+#btn-restart {
+  font-size:26px; padding:14px 60px;
+  background:#f0c040; color:#000;
+  border:none; border-radius:8px;
+  cursor:pointer; font-weight:bold;
+}
+#btn-restart:hover { background:#ffe080; }
+</style>
+</head>
+<body>
+
+<!-- BGM / SFX -->
+<audio id="bgm-title"  src="Music/01_title.mp3" loop></audio>
+<audio id="bgm-select" src="Music/02_select.mp3" loop></audio>
+<audio id="bgm-clear"  src="Music/03_clear.mp3"></audio>
+<audio id="sfx-hover"  src="Music/Mouse_over.wav"></audio>
+<audio id="sfx-cha"    src="Music/selectCha.mp3"></audio>
+<audio id="sfx-team"   src="Music/selectTeam.wav"></audio>
+
+<div id="app">
+
+  <!-- 화면1: 이름입력 -->
+  <div id="screen-name" class="screen active">
+    <input id="name-input" type="text" placeholder="플레이어 이름 입력" maxlength="20">
+    <button id="btn-name-ok">시작</button>
+  </div>
+
+  <!-- 화면2: 캐릭터 선택 -->
+  <div id="screen-select" class="screen">
+    <div id="sel-header">
+      <div class="h-title">KOF98</div>
+      <div class="h-team" id="h-team-ind">팀 1 선택 중</div>
+      <div class="h-score">남은 점수: <span id="h-score-val">21</span> / 21</div>
+    </div>
+    <div id="grid-area">
+      <div id="char-grid"></div>
+    </div>
+    <div id="team-area">
+      <div class="team-frame active-tf" id="tf-0">
+        <div class="tf-top">
+          <div class="tf-label">팀 1</div>
+          <div class="tf-score">점수: <span id="tf-score-0">0</span> / 21</div>
+        </div>
+        <div class="tf-slots" id="tfs-0">
+          <div class="tf-slot" id="ts-0-0"><span>?</span><button class="tf-remove" onclick="removeSlot(0,0)">✕</button></div>
+          <div class="tf-slot" id="ts-0-1"><span>?</span><button class="tf-remove" onclick="removeSlot(0,1)">✕</button></div>
+          <div class="tf-slot" id="ts-0-2"><span>?</span><button class="tf-remove" onclick="removeSlot(0,2)">✕</button></div>
+        </div>
+        <button class="btn-confirm" id="btn-c-0" disabled onclick="confirmTeam(0)">팀 확정</button>
+      </div>
+      <div class="team-frame" id="tf-1">
+        <div class="tf-top">
+          <div class="tf-label">팀 2</div>
+          <div class="tf-score">점수: <span id="tf-score-1">0</span> / 21</div>
+        </div>
+        <div class="tf-slots" id="tfs-1">
+          <div class="tf-slot" id="ts-1-0"><span>?</span><button class="tf-remove" onclick="removeSlot(1,0)">✕</button></div>
+          <div class="tf-slot" id="ts-1-1"><span>?</span><button class="tf-remove" onclick="removeSlot(1,1)">✕</button></div>
+          <div class="tf-slot" id="ts-1-2"><span>?</span><button class="tf-remove" onclick="removeSlot(1,2)">✕</button></div>
+        </div>
+        <button class="btn-confirm" id="btn-c-1" disabled onclick="confirmTeam(1)">팀 확정</button>
+      </div>
+      <div class="team-frame" id="tf-2">
+        <div class="tf-top">
+          <div class="tf-label">팀 3</div>
+          <div class="tf-score">점수: <span id="tf-score-2">0</span> / 21</div>
+        </div>
+        <div class="tf-slots" id="tfs-2">
+          <div class="tf-slot" id="ts-2-0"><span>?</span><button class="tf-remove" onclick="removeSlot(2,0)">✕</button></div>
+          <div class="tf-slot" id="ts-2-1"><span>?</span><button class="tf-remove" onclick="removeSlot(2,1)">✕</button></div>
+          <div class="tf-slot" id="ts-2-2"><span>?</span><button class="tf-remove" onclick="removeSlot(2,2)">✕</button></div>
+        </div>
+        <button class="btn-confirm" id="btn-c-2" disabled onclick="confirmTeam(2)">팀 확정</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 화면3: 결과 -->
+  <div id="screen-result" class="screen">
+    <div id="result-name"></div>
+    <div id="result-teams"></div>
+    <button id="btn-restart">처음으로</button>
+  </div>
+
+</div>
+
+<script>
+// ── 스케일링 ──
+function fitScreen() {
+  const app = document.getElementById('app');
+  const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+  app.style.transform = `scale(${s})`;
+  app.style.transformOrigin = 'top left';
+  app.style.left = ((window.innerWidth  - 1920 * s) / 2) + 'px';
+  app.style.top  = ((window.innerHeight - 1080 * s) / 2) + 'px';
+}
+window.addEventListener('load',   fitScreen);
+window.addEventListener('resize', fitScreen);
+
+// ── 데이터 ──
+const RANDOM_CHAR = {score:21, name:'랜덤', file:'21_랜덤.jpg', isRandom:true};
+const CHARS_RAW = [
+  {score:12, name:'치즈루',      file:'12_치즈루.jpg'},
+  {score:11, name:'각성크리스',  file:'11_각성크리스.jpg'},
+  {score:11, name:'고로',        file:'11_고로.jpg'},
+  {score:10, name:'마이',        file:'10_마이.jpg'},
+  {score:10, name:'이오리',      file:'10_이오리.jpg'},
+  {score:10, name:'크리스',      file:'10_크리스.jpg'},
+  {score:9,  name:'각성야시로',  file:'9_각성야시로.jpg'},
+  {score:9,  name:'로버트',      file:'9_로버트.jpg'},
+  {score:9,  name:'베니마루',    file:'9_베니마루.jpg'},
+  {score:9,  name:'야시로',      file:'9_야시로.jpg'},
+  {score:8,  name:'매튜어',      file:'8_매튜어.jpg'},
+  {score:8,  name:'야마자키',    file:'8_야마자키.jpg'},
+  {score:8,  name:'장거한',      file:'8_장거한.jpg'},
+  {score:8,  name:'쿄',          file:'8_쿄.jpg'},
+  {score:8,  name:'클래식료',    file:'8_클래식료.jpg'},
+  {score:8,  name:'타쿠마',      file:'8_타쿠마.jpg'},
+  {score:7,  name:'랄프',        file:'7_랄프.jpg'},
+  {score:7,  name:'레오나',      file:'7_레오나.jpg'},
+  {score:7,  name:'료',          file:'7_료.jpg'},
+  {score:7,  name:'마리',        file:'7_마리.jpg'},
+  {score:7,  name:'바이스',      file:'7_바이스.jpg'},
+  {score:7,  name:'죠',          file:'7_죠.jpg'},
+  {score:7,  name:'클래식마이',  file:'7_클래식마이.jpg'},
+  {score:7,  name:'테리',        file:'7_테리.jpg'},
+  {score:6,  name:'사이슈',      file:'6_사이슈.jpg'},
+  {score:6,  name:'아테나',      file:'6_아테나.jpg'},
+  {score:6,  name:'유리',        file:'6_유리.jpg'},
+  {score:6,  name:'최번개',      file:'6_최번개.jpg'},
+  {score:6,  name:'켄수',        file:'6_켄수.jpg'},
+  {score:6,  name:'클락',        file:'6_클락.jpg'},
+  {score:6,  name:'클래식로버트',file:'6_클래식로버트.jpg'},
+  {score:6,  name:'클래식쿄',    file:'6_클래식쿄.jpg'},
+  {score:5,  name:'김갑환',      file:'5_김갑환.jpg'},
+  {score:5,  name:'빌리',        file:'5_빌리.jpg'},
+  {score:5,  name:'셸미',        file:'5_셸미.jpg'},
+  {score:5,  name:'신고',        file:'5_신고.jpg'},
+  {score:5,  name:'킹',          file:'5_킹.jpg'},
+  {score:4,  name:'루갈',        file:'4_루갈.jpg'},
+  {score:4,  name:'앤디',        file:'4_앤디.jpg'},
+  {score:4,  name:'친',          file:'4_친.jpg'},
+  {score:4,  name:'클래식빌리',  file:'4_클래식빌리.jpg'},
+  {score:4,  name:'클래식테리',  file:'4_클래식테리.jpg'},
+  {score:4,  name:'헤비D',       file:'4_헤비D.jpg'},
+  {score:3,  name:'각성셸미',    file:'3_각성셸미.jpg'},
+  {score:3,  name:'럭키',        file:'3_럭키.jpg'},
+  {score:3,  name:'클래식앤디',  file:'3_클래식앤디.jpg'},
+  {score:3,  name:'클래식유리',  file:'3_클래식유리.jpg'},
+  {score:3,  name:'클래식죠',    file:'3_클래식죠.jpg'},
+  {score:3,  name:'하이데른',    file:'3_하이데른.jpg'},
+  {score:2,  name:'브라이언',    file:'2_브라이언.jpg'},
+];
+const CHARS = [RANDOM_CHAR, ...CHARS_RAW];
+
+const IMG_BASE = './Team/';
+const MAX_SCORE = 21;
+const TEAM_SIZE = 3;
+
+let playerName = '';
+let teams       = [null, null, null];
+let currentPick = [[], [], []];
+let activeTeam  = 0;
+let usedNames   = new Set();
+
+// ── BGM / SFX ──
+const bgmMap = {
+  'screen-name':   document.getElementById('bgm-title'),
+  'screen-select': document.getElementById('bgm-select'),
+  'screen-result': document.getElementById('bgm-clear'),
+};
+const sfxHover = document.getElementById('sfx-hover');
+const sfxCha   = document.getElementById('sfx-cha');
+const sfxTeam  = document.getElementById('sfx-team');
+
+function playSFX(el) {
+  el.currentTime = 0;
+  el.play().catch(()=>{});
+}
+
+let currentBGM = null;
+function playBGM(sid) {
+  const next = bgmMap[sid];
+  if (currentBGM && currentBGM !== next) { currentBGM.pause(); currentBGM.currentTime = 0; }
+  if (next && next !== currentBGM) { next.currentTime = 0; next.play().catch(()=>{}); currentBGM = next; }
+}
+document.addEventListener('click', () => { if (!currentBGM) playBGM('screen-name'); }, {once:true});
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  playBGM(id);
+}
+
+// ── 점수 이미지 HTML ──
+function scoreHTML(score) {
+  return String(score).split('').map(d => `<img src="number/0${d}.png">`).join('');
+}
+
+// ── 호버 사운드 딜레이 ──
+let hoverCooldown = false;
+function playHoverSFX() {
+  if (hoverCooldown) return;
+  playSFX(sfxHover);
+  hoverCooldown = true;
+  setTimeout(() => { hoverCooldown = false; }, 120);
+}
+
+// ── 그리드 구성 ──
+function buildGrid() {
+  const grid = document.getElementById('char-grid');
+  grid.innerHTML = '';
+  const allChars = [...CHARS_RAW, RANDOM_CHAR]; // 51개
+  const PER_ROW = 14;
+  for (let r = 0; r < 4; r++) {
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'char-row';
+    const slice = allChars.slice(r * PER_ROW, r * PER_ROW + PER_ROW);
+    slice.forEach(char => {
+      const slot = document.createElement('div');
+      slot.className = 'char-slot';
+      slot.dataset.name = char.name;
+      slot.title = `${char.name} (${char.score}점)`;
+      slot.innerHTML = `
+        <img class="char-img" src="${IMG_BASE}${char.file}" alt="${char.name}">
+        <div class="sf">
+          <img class="sf1" src="select1.png">
+          <img class="sf2" src="select2.png">
+        </div>
+        <div class="score-disp">${scoreHTML(char.score)}</div>
+      `;
+      slot.addEventListener('mouseenter', () => {
+        if (!slot.classList.contains('used') && !slot.classList.contains('disabled')) {
+          playHoverSFX();
+        }
+      });
+      slot.addEventListener('click', () => toggleChar(char, slot));
+      rowDiv.appendChild(slot);
+    });
+    grid.appendChild(rowDiv);
+  }
+}
+
+// ── currentScore ──
+function currentScore(ti) {
+  const picks = currentPick[ti];
+  if (picks.length > 0 && picks[0].isRandom) return 21;
+  return picks.reduce((s,c) => s + c.score, 0);
+}
+
+// ── 캐릭터 토글 ──
+function toggleChar(char, el) {
+  if (el.classList.contains('used') || el.classList.contains('disabled')) return;
+  const ti = activeTeam;
+  const picks = currentPick[ti];
+
+  if (char.isRandom) {
+    if (picks.length === TEAM_SIZE && picks[0].isRandom) {
+      currentPick[ti] = [];
+    } else {
+      currentPick[ti] = [RANDOM_CHAR, RANDOM_CHAR, RANDOM_CHAR];
+      playSFX(sfxCha);
+    }
+    updateUI(); return;
+  }
+
+  const idx = picks.findIndex(c => c.name === char.name && !c.isRandom);
+  if (idx !== -1) {
+    picks.splice(idx, 1);
+  } else {
+    if (picks.length >= TEAM_SIZE) return;
+    if (currentScore(ti) + char.score > MAX_SCORE) return;
+    picks.push(char);
+    playSFX(sfxCha);
+  }
+  updateUI();
+}
+
+// ── 슬롯 제거 ──
+function removeSlot(ti, si) {
+  if (ti !== activeTeam) return;
+  const picks = currentPick[ti];
+  if (!picks[si]) return;
+  if (picks[si].isRandom) currentPick[ti] = [];
+  else picks.splice(si, 1);
+  updateUI();
+}
+
+// ── 팀 확정 ──
+function confirmTeam(ti) {
+  if (ti !== activeTeam) return;
+  const picks = currentPick[ti];
+  if (picks.length < TEAM_SIZE) return;
+  teams[ti] = [...picks];
+  picks.forEach(c => { if (!c.isRandom) usedNames.add(c.name); });
+  playSFX(sfxTeam);
+  const next = teams.findIndex((t,i) => t === null && i > ti);
+  if (next !== -1) { activeTeam = next; updateUI(); }
+  else showResult();
+}
+
+// ── UI 전체 갱신 ──
+function updateUI() {
+  const ti = activeTeam;
+  document.getElementById('h-team-ind').textContent = `팀 ${ti+1} 선택 중`;
+  document.getElementById('h-score-val').textContent = MAX_SCORE - currentScore(ti);
+
+  for (let t = 0; t < 3; t++) {
+    const tf  = document.getElementById(`tf-${t}`);
+    const btn = document.getElementById(`btn-c-${t}`);
+    tf.classList.remove('active-tf','done-tf');
+
+    if (teams[t] !== null) {
+      tf.classList.add('done-tf');
+      btn.textContent = '확정됨'; btn.classList.add('confirmed'); btn.disabled = true;
+      const sc = teams[t][0].isRandom ? 21 : teams[t].reduce((s,c)=>s+c.score,0);
+      document.getElementById(`tf-score-${t}`).textContent = sc;
+      renderTSlots(t, teams[t], true);
+    } else if (t === activeTeam) {
+      tf.classList.add('active-tf');
+      btn.classList.remove('confirmed'); btn.textContent = '팀 확정';
+      btn.disabled = currentPick[t].length < TEAM_SIZE;
+      document.getElementById(`tf-score-${t}`).textContent = currentScore(t);
+      renderTSlots(t, currentPick[t], false);
+    } else {
+      btn.classList.remove('confirmed'); btn.textContent = '팀 확정'; btn.disabled = true;
+      document.getElementById(`tf-score-${t}`).textContent = 0;
+      renderTSlots(t, [], false);
+    }
+  }
+
+  const picks        = currentPick[activeTeam];
+  const isRandomPicked = picks.length > 0 && picks[0].isRandom;
+  const pickedNow    = new Set(picks.map(c => c.name));
+  const scoreNow     = currentScore(activeTeam);
+
+  document.querySelectorAll('.char-slot').forEach(el => {
+    const name = el.dataset.name;
+    const char = CHARS.find(c => c.name === name);
+    el.classList.remove('selected','used','disabled');
+    if (char.isRandom) {
+      if (isRandomPicked) el.classList.add('selected');
+    } else if (usedNames.has(name)) {
+      el.classList.add('used');
+    } else if (isRandomPicked) {
+      el.classList.add('disabled');
+    } else if (pickedNow.has(name)) {
+      el.classList.add('selected');
+    } else if (picks.length < TEAM_SIZE && scoreNow + char.score > MAX_SCORE) {
+      el.classList.add('disabled');
+    }
+  });
+}
+
+function renderTSlots(ti, picks, done) {
+  for (let si = 0; si < TEAM_SIZE; si++) {
+    const slot = document.getElementById(`ts-${ti}-${si}`);
+    const char = picks[si];
+    slot.classList.remove('filled','filled-done');
+    if (char) {
+      slot.classList.add(done ? 'filled-done' : 'filled');
+      slot.innerHTML = `
+        <img class="tf-char-img" src="${IMG_BASE}${char.file}" alt="${char.name}">
+        <div class="tf-score-disp">${scoreHTML(char.isRandom ? 21 : char.score)}</div>
+        ${done ? '' : `<button class="tf-remove" onclick="removeSlot(${ti},${si})">✕</button>`}
+      `;
+    } else {
+      slot.innerHTML = `<span>?</span>`;
+    }
+  }
+}
+
+// ── 결과 화면 ──
+function showResult() {
+  document.getElementById('result-name').textContent = playerName;
+  const container = document.getElementById('result-teams');
+  container.innerHTML = '';
+  teams.forEach((team, ti) => {
+    const div = document.createElement('div');
+    div.className = 'result-team';
+    div.innerHTML = `<div class="rt-label">팀 ${ti+1}</div>`;
+    team.forEach((char, ci) => {
+      if (ci > 0) div.innerHTML += `<div class="rt-plus">+</div>`;
+      div.innerHTML += `<div class="rt-char">
+        <img src="${IMG_BASE}${char.file}" alt="${char.name}">
+        <span>${char.isRandom ? '랜덤' : char.name + ' (' + char.score + ')'}</span>
+      </div>`;
+    });
+    const total = team[0].isRandom ? 21 : team.reduce((s,c)=>s+c.score,0);
+    div.innerHTML += `<div class="rt-total">합계: ${total}점</div>`;
+    container.appendChild(div);
+  });
+  showScreen('screen-result');
+}
+
+// ── 이벤트 ──
+document.getElementById('btn-name-ok').addEventListener('click', () => {
+  const v = document.getElementById('name-input').value.trim();
+  if (!v) { alert('이름을 입력해주세요.'); return; }
+  playerName = v;
+  buildGrid();
+  showScreen('screen-select');
+  updateUI();
+});
+document.getElementById('name-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('btn-name-ok').click();
+});
+document.getElementById('btn-restart').addEventListener('click', () => {
+  playerName = ''; teams = [null,null,null];
+  currentPick = [[],[],[]]; activeTeam = 0; usedNames = new Set();
+  document.getElementById('name-input').value = '';
+  showScreen('screen-name');
+});
+</script>
+</body>
+</html>
