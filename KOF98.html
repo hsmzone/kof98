@@ -666,8 +666,20 @@ document.getElementById('name-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') document.getElementById('btn-name-ok').click();
 });
 document.getElementById('btn-save').addEventListener('click', () => {
+  const app = document.getElementById('app');
   const target = document.getElementById('screen-result');
-  html2canvas(target, { scale:2, useCORS:true, backgroundColor:'#0a0a1a' }).then(canvas => {
+  // 캡처 전: transform 제거해서 1920×1080 원본 크기로 복원
+  const prevTransform = app.style.transform;
+  const prevLeft = app.style.left;
+  const prevTop  = app.style.top;
+  app.style.transform = 'none';
+  app.style.left = '0';
+  app.style.top  = '0';
+  html2canvas(target, { scale:1, useCORS:true, backgroundColor:'#0a0a1a' }).then(canvas => {
+    // 캡처 후: transform 복원
+    app.style.transform = prevTransform;
+    app.style.left = prevLeft;
+    app.style.top  = prevTop;
     const a = document.createElement('a');
     a.download = `KOF98_${playerName}_draft.png`;
     a.href = canvas.toDataURL('image/png');
