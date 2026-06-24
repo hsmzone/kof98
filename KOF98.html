@@ -40,8 +40,20 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
   width:500px; text-align:center;
 }
 #name-input:focus { border-color:#fff; box-shadow:0 0 16px #f0c040; }
+#difficulty-group {
+  display:flex; gap:20px; margin-top:36px;
+}
+.btn-diff {
+  font-size:26px; padding:14px 40px;
+  border:3px solid #555; border-radius:8px;
+  background:#1a1a3a; color:#aaa;
+  cursor:pointer; font-weight:bold;
+  transition: all 0.15s;
+}
+.btn-diff:hover { border-color:#f0c040; color:#f0c040; }
+.btn-diff.selected { border-color:#f0c040; background:#f0c040; color:#000; }
 #btn-name-ok {
-  margin-top:32px;
+  margin-top:28px;
   font-size:32px; padding:16px 80px;
   background:#f0c040; color:#000;
   border:none; border-radius:8px;
@@ -279,6 +291,11 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
   <!-- 화면1: 이름입력 -->
   <div id="screen-name" class="screen active">
     <input id="name-input" type="text" placeholder="플레이어 이름 입력" maxlength="20">
+    <div id="difficulty-group">
+      <button class="btn-diff" data-score="30">초보 (30점)</button>
+      <button class="btn-diff" data-score="25">중수 (25점)</button>
+      <button class="btn-diff selected" data-score="21">고수 (21점)</button>
+    </div>
     <button id="btn-name-ok">시작</button>
   </div>
 
@@ -287,7 +304,7 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
     <div id="sel-header">
       <div class="h-title">KOF98</div>
       <div class="h-team" id="h-team-ind">팀 1 선택 중</div>
-      <div class="h-score">남은 점수: <span id="h-score-val">21</span> / 21</div>
+      <div class="h-score">남은 점수: <span id="h-score-val">21</span> / <span id="h-score-max">21</span></div>
     </div>
     <div id="grid-area">
       <div id="char-grid"></div>
@@ -296,7 +313,7 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
       <div class="team-frame active-tf" id="tf-0">
         <div class="tf-top">
           <div class="tf-label">팀 1</div>
-          <div class="tf-score">점수: <span id="tf-score-0">0</span> / 21</div>
+          <div class="tf-score">점수: <span id="tf-score-0">0</span> / <span class="tf-score-max">21</span></div>
         </div>
         <div class="tf-slots" id="tfs-0">
           <div class="tf-slot" id="ts-0-0"><span>?</span><button class="tf-remove" onclick="removeSlot(0,0)">✕</button></div>
@@ -308,7 +325,7 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
       <div class="team-frame" id="tf-1">
         <div class="tf-top">
           <div class="tf-label">팀 2</div>
-          <div class="tf-score">점수: <span id="tf-score-1">0</span> / 21</div>
+          <div class="tf-score">점수: <span id="tf-score-1">0</span> / <span class="tf-score-max">21</span></div>
         </div>
         <div class="tf-slots" id="tfs-1">
           <div class="tf-slot" id="ts-1-0"><span>?</span><button class="tf-remove" onclick="removeSlot(1,0)">✕</button></div>
@@ -320,7 +337,7 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
       <div class="team-frame" id="tf-2">
         <div class="tf-top">
           <div class="tf-label">팀 3</div>
-          <div class="tf-score">점수: <span id="tf-score-2">0</span> / 21</div>
+          <div class="tf-score">점수: <span id="tf-score-2">0</span> / <span class="tf-score-max">21</span></div>
         </div>
         <div class="tf-slots" id="tfs-2">
           <div class="tf-slot" id="ts-2-0"><span>?</span><button class="tf-remove" onclick="removeSlot(2,0)">✕</button></div>
@@ -414,7 +431,7 @@ const CHARS_RAW = [
 const CHARS = [RANDOM_CHAR, ...CHARS_RAW];
 
 const IMG_BASE = './Team/';
-const MAX_SCORE = 21;
+let MAX_SCORE = 21;
 const TEAM_SIZE = 3;
 
 let playerName = '';
@@ -563,7 +580,11 @@ function confirmTeam(ti) {
 function updateUI() {
   const ti = activeTeam;
   document.getElementById('h-team-ind').textContent = `팀 ${ti+1} 선택 중`;
+  document.getElementById('h-score-max').textContent = MAX_SCORE;
   document.getElementById('h-score-val').textContent = MAX_SCORE - currentScore(ti);
+  document.querySelectorAll('.tf-score-max').forEach(el => {
+    el.textContent = MAX_SCORE;
+  });
 
   for (let t = 0; t < 3; t++) {
     const tf  = document.getElementById(`tf-${t}`);
@@ -654,6 +675,15 @@ function showResult() {
 }
 
 // ── 이벤트 ──
+// ── 난이도 버튼 ──
+document.querySelectorAll('.btn-diff').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.btn-diff').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    MAX_SCORE = parseInt(btn.dataset.score);
+  });
+});
+
 document.getElementById('btn-name-ok').addEventListener('click', () => {
   const v = document.getElementById('name-input').value.trim();
   if (!v) { alert('이름을 입력해주세요.'); return; }
