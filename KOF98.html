@@ -523,24 +523,29 @@ function currentScore(ti) {
   return currentPick[ti].reduce((s,c) => s + c.score, 0);
 }
 
+// ── 베이스 이름 (클래식/각성 제거) ──
+function baseName(name) {
+  return name.replace(/^(클래식|각성)/, '');
+}
+
 // ── 랜덤 3명 뽑기 ──
 function pickRandom(ti) {
   const available = CHARS_RAW.filter(c => !usedNames.has(c.name));
-  // 점수 합 MAX_SCORE 이하인 3명 조합을 랜덤으로 뽑기 (최대 200회 시도)
-  for (let attempt = 0; attempt < 200; attempt++) {
+  for (let attempt = 0; attempt < 300; attempt++) {
     const shuffled = [...available].sort(() => Math.random() - 0.5);
     const pick = [];
     let total = 0;
     for (const c of shuffled) {
       if (pick.length === TEAM_SIZE) break;
-      if (total + c.score <= MAX_SCORE) {
-        pick.push(c);
-        total += c.score;
-      }
+      if (total + c.score > MAX_SCORE) continue;
+      // 같은 팀 내 베이스 이름 중복 제외
+      if (pick.some(p => baseName(p.name) === baseName(c.name))) continue;
+      pick.push(c);
+      total += c.score;
     }
     if (pick.length === TEAM_SIZE) return pick;
   }
-  return null; // 조합 불가 (극히 드문 경우)
+  return null;
 }
 
 // ── 캐릭터 토글 ──
@@ -573,6 +578,8 @@ function toggleChar(char, el) {
   } else {
     if (picks.length >= TEAM_SIZE) return;
     if (currentScore(ti) + char.score > MAX_SCORE) return;
+    // 같은 팀 내 베이스 이름 중복 방지
+    if (picks.some(p => baseName(p.name) === baseName(char.name))) return;
     picks.push(char);
     playSFX(sfxCha);
   }
@@ -658,7 +665,10 @@ function updateUI() {
       el.classList.add('disabled');
     } else if (pickedNow.has(name)) {
       el.classList.add('selected');
-    } else if (picks.length < TEAM_SIZE && scoreNow + char.score > MAX_SCORE) {
+    } else if (picks.length < TEAM_SIZE && (
+      scoreNow + char.score > MAX_SCORE ||
+      picks.some(p => baseName(p.name) === baseName(char.name))
+    )) {
       el.classList.add('disabled');
     }
   });
