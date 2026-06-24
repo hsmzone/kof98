@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>KOF98</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 html, body { width:100%; height:100%; background:#000; overflow:hidden; }
@@ -253,6 +254,14 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
   cursor:pointer; font-weight:bold;
 }
 #btn-restart:hover { background:#ffe080; }
+#btn-save {
+  font-size:26px; padding:14px 60px;
+  background:#4488cc; color:#fff;
+  border:none; border-radius:8px;
+  cursor:pointer; font-weight:bold;
+}
+#btn-save:hover { background:#66aaff; }
+#result-buttons { display:flex; gap:24px; }
 </style>
 </head>
 <body>
@@ -327,7 +336,10 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
   <div id="screen-result" class="screen">
     <div id="result-name"></div>
     <div id="result-teams"></div>
-    <button id="btn-restart">처음으로</button>
+    <div id="result-buttons">
+      <button id="btn-save">이미지 저장</button>
+      <button id="btn-restart">처음으로</button>
+    </div>
   </div>
 
 </div>
@@ -653,6 +665,16 @@ document.getElementById('btn-name-ok').addEventListener('click', () => {
 document.getElementById('name-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') document.getElementById('btn-name-ok').click();
 });
+document.getElementById('btn-save').addEventListener('click', () => {
+  const target = document.getElementById('screen-result');
+  html2canvas(target, { scale:2, useCORS:true, backgroundColor:'#0a0a1a' }).then(canvas => {
+    const a = document.createElement('a');
+    a.download = `KOF98_${playerName}_draft.png`;
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  });
+});
+
 document.getElementById('btn-restart').addEventListener('click', () => {
   playerName = ''; teams = [null,null,null];
   currentPick = [[],[],[]]; activeTeam = 0; usedNames = new Set();
