@@ -375,7 +375,7 @@ window.addEventListener('load',   fitScreen);
 window.addEventListener('resize', fitScreen);
 
 // ── 데이터 ──
-const RANDOM_CHAR = {score:21, name:'랜덤', file:'21_랜덤.jpg', isRandom:true};
+const RANDOM_CHAR = {score:0, name:'랜덤', file:'21_랜덤.jpg', isRandom:true}; // 랜덤 버튼용 (실제 점수 없음)
 const CHARS_RAW = [
   {score:12, name:'치즈루',      file:'12_치즈루.jpg'},
   {score:11, name:'각성크리스',  file:'11_각성크리스.jpg'},
@@ -520,9 +520,27 @@ function buildGrid() {
 
 // ── currentScore ──
 function currentScore(ti) {
-  const picks = currentPick[ti];
-  if (picks.length > 0 && picks[0].isRandom) return 21;
-  return picks.reduce((s,c) => s + c.score, 0);
+  return currentPick[ti].reduce((s,c) => s + c.score, 0);
+}
+
+// ── 랜덤 3명 뽑기 ──
+function pickRandom(ti) {
+  const available = CHARS_RAW.filter(c => !usedNames.has(c.name));
+  // 점수 합 MAX_SCORE 이하인 3명 조합을 랜덤으로 뽑기 (최대 200회 시도)
+  for (let attempt = 0; attempt < 200; attempt++) {
+    const shuffled = [...available].sort(() => Math.random() - 0.5);
+    const pick = [];
+    let total = 0;
+    for (const c of shuffled) {
+      if (pick.length === TEAM_SIZE) break;
+      if (total + c.score <= MAX_SCORE) {
+        pick.push(c);
+        total += c.score;
+      }
+    }
+    if (pick.length === TEAM_SIZE) return pick;
+  }
+  return null; // 조합 불가 (극히 드문 경우)
 }
 
 // ── 캐릭터 토글 ──
@@ -532,16 +550,24 @@ function toggleChar(char, el) {
   const picks = currentPick[ti];
 
   if (char.isRandom) {
-    if (picks.length === TEAM_SIZE && picks[0].isRandom) {
+    // 이미 랜덤으로 채워진 상태면 취소
+    if (picks.length === TEAM_SIZE && picks._isRandom) {
       currentPick[ti] = [];
+      currentPick[ti]._isRandom = false;
     } else {
-      currentPick[ti] = [RANDOM_CHAR, RANDOM_CHAR, RANDOM_CHAR];
+      const result = pickRandom(ti);
+      if (!result) { alert('조합 가능한 캐릭터가 없습니다.'); return; }
+      currentPick[ti] = result;
+      currentPick[ti]._isRandom = true;
       playSFX(sfxCha);
     }
     updateUI(); return;
   }
 
-  const idx = picks.findIndex(c => c.name === char.name && !c.isRandom);
+  // 랜덤으로 채워진 상태면 일반 클릭 무시
+  if (picks._isRandom) return;
+
+  const idx = picks.findIndex(c => c.name === char.name);
   if (idx !== -1) {
     picks.splice(idx, 1);
   } else {
@@ -558,8 +584,13 @@ function removeSlot(ti, si) {
   if (ti !== activeTeam) return;
   const picks = currentPick[ti];
   if (!picks[si]) return;
-  if (picks[si].isRandom) currentPick[ti] = [];
-  else picks.splice(si, 1);
+  // 랜덤으로 채워진 경우 전체 초기화
+  if (picks._isRandom) {
+    currentPick[ti] = [];
+    currentPick[ti]._isRandom = false;
+  } else {
+    picks.splice(si, 1);
+  }
   updateUI();
 }
 
@@ -569,7 +600,7 @@ function confirmTeam(ti) {
   const picks = currentPick[ti];
   if (picks.length < TEAM_SIZE) return;
   teams[ti] = [...picks];
-  picks.forEach(c => { if (!c.isRandom) usedNames.add(c.name); });
+  picks.forEach(c => usedNames.add(c.name));
   playSFX(sfxTeam);
   const next = teams.findIndex((t,i) => t === null && i > ti);
   if (next !== -1) { activeTeam = next; updateUI(); }
@@ -594,7 +625,7 @@ function updateUI() {
     if (teams[t] !== null) {
       tf.classList.add('done-tf');
       btn.textContent = '확정됨'; btn.classList.add('confirmed'); btn.disabled = true;
-      const sc = teams[t][0].isRandom ? 21 : teams[t].reduce((s,c)=>s+c.score,0);
+      const sc = teams[t].reduce((s,c)=>s+c.score,0);
       document.getElementById(`tf-score-${t}`).textContent = sc;
       renderTSlots(t, teams[t], true);
     } else if (t === activeTeam) {
@@ -611,7 +642,7 @@ function updateUI() {
   }
 
   const picks        = currentPick[activeTeam];
-  const isRandomPicked = picks.length > 0 && picks[0].isRandom;
+  const isRandomPicked = !!picks._isRandom;
   const pickedNow    = new Set(picks.map(c => c.name));
   const scoreNow     = currentScore(activeTeam);
 
@@ -642,7 +673,7 @@ function renderTSlots(ti, picks, done) {
       slot.classList.add(done ? 'filled-done' : 'filled');
       slot.innerHTML = `
         <img class="tf-char-img" src="${IMG_BASE}${char.file}" alt="${char.name}">
-        <div class="tf-score-disp">${scoreHTML(char.isRandom ? 21 : char.score)}</div>
+        <div class="tf-score-disp">${scoreHTML(char.score)}</div>
         ${done ? '' : `<button class="tf-remove" onclick="removeSlot(${ti},${si})">✕</button>`}
       `;
     } else {
@@ -664,10 +695,10 @@ function showResult() {
       if (ci > 0) div.innerHTML += `<div class="rt-plus">+</div>`;
       div.innerHTML += `<div class="rt-char">
         <img src="${IMG_BASE}${char.file}" alt="${char.name}">
-        <span>${char.isRandom ? '랜덤' : char.name + ' (' + char.score + ')'}</span>
+        <span>${char.name} (${char.score}점)</span>
       </div>`;
     });
-    const total = team[0].isRandom ? 21 : team.reduce((s,c)=>s+c.score,0);
+    const total = team.reduce((s,c)=>s+c.score,0);
     div.innerHTML += `<div class="rt-total">합계: ${total}점</div>`;
     container.appendChild(div);
   });
