@@ -95,6 +95,19 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
 .a-score-btn:hover  { background:#333366; border-color:#f0c040; color:#f0c040; }
 .a-score-btn.active { background:#f0c040; border-color:#f0c040; color:#000; }
 
+/* 사운드 토글 버튼 */
+#btn-sound {
+  position:absolute; top:16px; right:16px;
+  z-index:200;
+  font-size:18px; font-weight:bold;
+  padding:8px 18px;
+  border:2px solid #f0c040; border-radius:6px;
+  background:#111130; color:#f0c040;
+  cursor:pointer;
+}
+#btn-sound:hover { background:#222250; }
+#btn-sound.off { border-color:#555; color:#555; background:#0a0a1a; }
+
 /* ══ 화면2: 캐릭터 선택 ══ */
 #screen-select {
   background: linear-gradient(160deg, #050020 0%, #180018 45%, #280008 100%);
@@ -321,6 +334,7 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
 <audio id="sfx-team"   src="Music/selectTeam.wav"></audio>
 
 <div id="app">
+<button id="btn-sound">🔊 Sound ON</button>
 
   <!-- 화면1: 이름입력 -->
   <div id="screen-name" class="screen active">
@@ -499,17 +513,39 @@ const sfxHover = document.getElementById('sfx-hover');
 const sfxCha   = document.getElementById('sfx-cha');
 const sfxTeam  = document.getElementById('sfx-team');
 
+let currentBGM = null;
+let soundOn = true;
+
+function playBGM(sid) {
+  const next = bgmMap[sid];
+  if (currentBGM && currentBGM !== next) { currentBGM.pause(); currentBGM.currentTime = 0; }
+  if (next && next !== currentBGM) {
+    currentBGM = next;
+    if (soundOn) { next.currentTime = 0; next.play().catch(()=>{}); }
+  }
+}
+
 function playSFX(el) {
+  if (!soundOn) return;
   el.currentTime = 0;
   el.play().catch(()=>{});
 }
 
-let currentBGM = null;
-function playBGM(sid) {
-  const next = bgmMap[sid];
-  if (currentBGM && currentBGM !== next) { currentBGM.pause(); currentBGM.currentTime = 0; }
-  if (next && next !== currentBGM) { next.currentTime = 0; next.play().catch(()=>{}); currentBGM = next; }
-}
+// ── 사운드 토글 ──
+const btnSound = document.getElementById('btn-sound');
+btnSound.addEventListener('click', (e) => {
+  e.stopPropagation();
+  soundOn = !soundOn;
+  btnSound.textContent = soundOn ? '🔊 Sound ON' : '🔇 Sound OFF';
+  btnSound.classList.toggle('off', !soundOn);
+  if (soundOn) {
+    // 현재 화면 BGM 재개
+    if (currentBGM) { currentBGM.currentTime = 0; currentBGM.play().catch(()=>{}); }
+  } else {
+    // 모든 오디오 정지
+    if (currentBGM) currentBGM.pause();
+  }
+});
 document.addEventListener('click', () => { if (!currentBGM) playBGM('screen-name'); }, {once:true});
 
 function showScreen(id) {
