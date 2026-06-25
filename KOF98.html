@@ -52,14 +52,24 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
 }
 .btn-diff:hover { border-color:#f0c040; color:#f0c040; }
 .btn-diff.selected { border-color:#f0c040; background:#f0c040; color:#000; }
+#start-row {
+  display:flex; align-items:center; gap:24px; margin-top:28px;
+}
 #btn-name-ok {
-  margin-top:28px;
   font-size:32px; padding:16px 80px;
   background:#f0c040; color:#000;
   border:none; border-radius:8px;
   cursor:pointer; font-weight:bold;
 }
 #btn-name-ok:hover { background:#ffe080; }
+.btn-team-random {
+  font-size:22px; padding:16px 32px;
+  background:#1a1a3a; color:#aaddff;
+  border:3px solid #4488cc; border-radius:8px;
+  cursor:pointer; font-weight:bold; line-height:1.4;
+  text-align:center;
+}
+.btn-team-random:hover { background:#223366; border-color:#66aaff; color:#fff; }
 
 /* ══ 화면2: 캐릭터 선택 ══ */
 #screen-select {
@@ -298,7 +308,11 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
       <button class="btn-diff" data-score="18">B등급 (18점)</button>
       <button class="btn-diff" data-score="15">A등급 (15점)</button>
     </div>
-    <button id="btn-name-ok">시작</button>
+    <div id="start-row">
+      <button class="btn-team-random" id="btn-rand-ex">팀 랜덤<br>(각성,EX 포함)</button>
+      <button id="btn-name-ok">시작</button>
+      <button class="btn-team-random" id="btn-rand-orig">팀 랜덤<br>(오리지널)</button>
+    </div>
   </div>
 
   <!-- 화면2: 캐릭터 선택 -->
@@ -393,7 +407,7 @@ const CHARS_RAW = [
   {score:8,  name:'야마자키',    file:'8_야마자키.jpg'},
   {score:8,  name:'장거한',      file:'8_장거한.jpg'},
   {score:8,  name:'쿄',          file:'8_쿄.jpg'},
-  {score:8,  name:'클래식료',    file:'8_클래식료.jpg'},
+  {score:8,  name:'EX료',    file:'8_EX료.jpg'},
   {score:8,  name:'타쿠마',      file:'8_타쿠마.jpg'},
   {score:7,  name:'랄프',        file:'7_랄프.jpg'},
   {score:7,  name:'레오나',      file:'7_레오나.jpg'},
@@ -401,7 +415,7 @@ const CHARS_RAW = [
   {score:7,  name:'마리',        file:'7_마리.jpg'},
   {score:7,  name:'바이스',      file:'7_바이스.jpg'},
   {score:7,  name:'죠',          file:'7_죠.jpg'},
-  {score:7,  name:'클래식마이',  file:'7_클래식마이.jpg'},
+  {score:7,  name:'EX마이',  file:'7_EX마이.jpg'},
   {score:7,  name:'테리',        file:'7_테리.jpg'},
   {score:6,  name:'사이슈',      file:'6_사이슈.jpg'},
   {score:6,  name:'아테나',      file:'6_아테나.jpg'},
@@ -409,8 +423,8 @@ const CHARS_RAW = [
   {score:6,  name:'최번개',      file:'6_최번개.jpg'},
   {score:6,  name:'켄수',        file:'6_켄수.jpg'},
   {score:6,  name:'클락',        file:'6_클락.jpg'},
-  {score:6,  name:'클래식로버트',file:'6_클래식로버트.jpg'},
-  {score:6,  name:'클래식쿄',    file:'6_클래식쿄.jpg'},
+  {score:6,  name:'EX로버트',file:'6_EX로버트.jpg'},
+  {score:6,  name:'EX쿄',    file:'6_EX쿄.jpg'},
   {score:5,  name:'김갑환',      file:'5_김갑환.jpg'},
   {score:5,  name:'빌리',        file:'5_빌리.jpg'},
   {score:5,  name:'셸미',        file:'5_셸미.jpg'},
@@ -419,14 +433,14 @@ const CHARS_RAW = [
   {score:4,  name:'루갈',        file:'4_루갈.jpg'},
   {score:4,  name:'앤디',        file:'4_앤디.jpg'},
   {score:4,  name:'친',          file:'4_친.jpg'},
-  {score:4,  name:'클래식빌리',  file:'4_클래식빌리.jpg'},
-  {score:4,  name:'클래식테리',  file:'4_클래식테리.jpg'},
+  {score:4,  name:'EX빌리',  file:'4_EX빌리.jpg'},
+  {score:4,  name:'EX테리',  file:'4_EX테리.jpg'},
   {score:4,  name:'헤비D',       file:'4_헤비D.jpg'},
   {score:3,  name:'각성셸미',    file:'3_각성셸미.jpg'},
   {score:3,  name:'럭키',        file:'3_럭키.jpg'},
-  {score:3,  name:'클래식앤디',  file:'3_클래식앤디.jpg'},
-  {score:3,  name:'클래식유리',  file:'3_클래식유리.jpg'},
-  {score:3,  name:'클래식죠',    file:'3_클래식죠.jpg'},
+  {score:3,  name:'EX앤디',  file:'3_EX앤디.jpg'},
+  {score:3,  name:'EX유리',  file:'3_EX유리.jpg'},
+  {score:3,  name:'EX죠',    file:'3_EX죠.jpg'},
   {score:3,  name:'하이데른',    file:'3_하이데른.jpg'},
   {score:2,  name:'브라이언',    file:'2_브라이언.jpg'},
 ];
@@ -525,9 +539,9 @@ function currentScore(ti) {
   return currentPick[ti].reduce((s,c) => s + c.score, 0);
 }
 
-// ── 베이스 이름 (클래식/각성 제거) ──
+// ── 베이스 이름 (EX/각성 제거) ──
 function baseName(name) {
-  return name.replace(/^(클래식|각성)/, '');
+  return name.replace(/^(EX|각성)/, '');
 }
 
 // ── 랜덤 3명 뽑기 ──
@@ -718,6 +732,52 @@ function showResult() {
 }
 
 // ── 이벤트 ──
+// ── 원작 12팀 리스트 ──
+const TEAMS_12 = [
+  ['쿄','베니마루','고로'],
+  ['테리','앤디','죠'],
+  ['료','로버트','유리'],
+  ['레오나','랄프','클락'],
+  ['아테나','켄수','친'],
+  ['치즈루','마이','킹'],
+  ['김갑환','장거한','최번개'],
+  ['야시로','셸미','크리스'],
+  ['야마자키','마리','빌리'],
+  ['이오리','매튜어','바이스'],
+  ['하이데른','타쿠마','사이슈'],
+  ['헤비D','럭키','브라이언'],
+];
+
+// ── 팀 랜덤 (12팀 리스트 기반) ──
+function pickTeamRandom(includeVariants) {
+  const v = document.getElementById('name-input').value.trim();
+  if (!v) { alert('이름을 입력해주세요.'); return; }
+  playerName = v;
+
+  // 12팀 중 3팀 랜덤 선택
+  const shuffled = [...TEAMS_12].sort(() => Math.random() - 0.5);
+  const picked3 = shuffled.slice(0, 3);
+
+  teams = picked3.map(teamNames =>
+    teamNames.map(name => {
+      if (includeVariants) {
+        // 오리지널 + 각성/EX 버전 중 랜덤 선택
+        const options = CHARS_RAW.filter(c => baseName(c.name) === name);
+        return options[Math.floor(Math.random() * options.length)];
+      } else {
+        // 오리지널만
+        return CHARS_RAW.find(c => c.name === name);
+      }
+    }).filter(Boolean)
+  );
+
+  usedNames = new Set(teams.flat().map(c => c.name));
+  showResult();
+}
+
+document.getElementById('btn-rand-ex').addEventListener('click', () => pickTeamRandom(true));
+document.getElementById('btn-rand-orig').addEventListener('click', () => pickTeamRandom(false));
+
 // ── 난이도 버튼 ──
 document.querySelectorAll('.btn-diff').forEach(btn => {
   btn.addEventListener('click', () => {
