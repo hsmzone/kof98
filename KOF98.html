@@ -95,6 +95,243 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
 .a-score-btn:hover  { background:#333366; border-color:#f0c040; color:#f0c040; }
 .a-score-btn.active { background:#f0c040; border-color:#f0c040; color:#000; }
 
+/* 이름 입력 행: 양옆 버튼 */
+#name-row {
+  display:flex; align-items:center; gap:20px;
+}
+.btn-side {
+  width:180px; height:60px;
+  font-size:18px; font-weight:bold;
+  border-radius:8px; cursor:pointer;
+  border:3px solid #4488cc;
+  background:#1a1a3a; color:#aaddff;
+  transition:all 0.15s;
+}
+.btn-side:hover { background:#223366; border-color:#66aaff; color:#fff; }
+#btn-dup-toggle {
+  border-color:#cc6644; color:#ffaa88;
+}
+#btn-dup-toggle:hover { background:#331a0a; border-color:#ff8855; color:#fff; }
+#btn-dup-toggle.dup-on {
+  border-color:#44cc88; color:#aaffcc; background:#0a331a;
+}
+#btn-dup-toggle.dup-on:hover { background:#113322; border-color:#66ffaa; color:#fff; }
+
+/* ══ 대회 모드 화면 ══ */
+#screen-tournament-mode,
+#screen-tournament-setup,
+#screen-tournament-members,
+#screen-tournament-bracket,
+#screen-tournament-rand-players,
+#screen-tournament-rand-teams {
+  background: radial-gradient(ellipse at center, #0a1a2a 0%, #050010 100%);
+  flex-direction:column; align-items:center; text-align:center;
+}
+#screen-tournament-mode        { justify-content:center; gap:40px; padding:70px 350px 40px 350px; }
+#screen-tournament-setup       { justify-content:center; gap:26px; padding:50px 350px 40px 350px; }
+#screen-tournament-members     { justify-content:center; gap:20px; padding:40px 350px 40px 350px; }
+#screen-tournament-bracket     { justify-content:flex-start; padding:14px 0 10px; gap:10px; overflow:hidden; }
+#screen-tournament-rand-players{ justify-content:center; gap:18px; padding:70px 350px 40px 40px; }
+#screen-tournament-rand-teams  { justify-content:center; gap:22px; padding:50px 350px 40px 40px; }
+
+.tour-title   { font-size:46px; font-weight:bold; color:#f0c040; letter-spacing:4px; text-shadow:0 0 20px #f0c040aa; }
+.tour-subtitle{ font-size:20px; color:#aaddff; }
+
+/* 팀 수 선택 */
+.tour-count-row { display:flex; align-items:center; gap:14px; font-size:22px; color:#ccc; }
+.tour-count-btn {
+  width:46px; height:46px; font-size:26px; font-weight:bold;
+  border:2px solid #f0c040; background:#1a1a3a; color:#f0c040; border-radius:6px; cursor:pointer;
+}
+.tour-count-btn:hover { background:#333366; }
+.tour-count-btn:disabled { opacity:0.3; cursor:not-allowed; }
+.tour-count-val { font-size:34px; font-weight:bold; color:#f0c040; width:52px; text-align:center; }
+
+/* 팀 이름 입력 */
+#tour-team-inputs { display:flex; flex-direction:column; gap:9px; width:560px; }
+.tour-team-row    { display:flex; align-items:center; gap:10px; }
+.tour-team-label  { font-size:17px; color:#aaddff; width:52px; flex-shrink:0; }
+.tour-team-input  {
+  font-size:19px; padding:9px 14px;
+  border:2px solid #4488cc; background:#111130; color:#fff;
+  border-radius:6px; outline:none; width:200px;
+}
+.tour-team-input:focus { border-color:#66aaff; }
+
+/* 팀 컬러 스와치 */
+.tour-color-swatches { display:flex; gap:6px; align-items:center; }
+.tour-color-swatch {
+  width:28px; height:28px; border-radius:50%;
+  border:3px solid transparent; cursor:pointer;
+  transition:transform 0.1s, border-color 0.1s;
+  flex-shrink:0;
+}
+.tour-color-swatch:hover { transform:scale(1.2); }
+.tour-color-swatch.selected { border-color:#fff; transform:scale(1.15); }
+
+/* 규칙 메모 */
+.tour-rules-wrap  { display:flex; flex-direction:column; gap:7px; width:540px; }
+.tour-rules-label { font-size:15px; color:#f0c04088; }
+#tour-rules {
+  width:100%; height:84px; resize:none;
+  background:#0a0a20; border:2px solid #333366;
+  color:#ccc; font-size:15px; padding:8px 12px;
+  border-radius:6px; outline:none; font-family:'Malgun Gothic',sans-serif;
+}
+#tour-rules:focus { border-color:#f0c04066; }
+
+/* 팀원 입력 */
+#tour-member-title    { font-size:34px; font-weight:bold; color:#f0c040; }
+#tour-member-progress { font-size:19px; color:#aaddff; }
+#tour-member-inputs   { display:flex; flex-direction:column; gap:8px; width:380px; max-height:460px; overflow-y:auto; }
+.tour-member-row { display:flex; gap:10px; align-items:center; }
+.tour-member-input {
+  font-size:19px; padding:9px 13px;
+  border:2px solid #4488cc; background:#111130; color:#fff;
+  border-radius:6px; outline:none; flex:1;
+}
+.tour-member-input:focus { border-color:#66aaff; }
+.tour-member-del {
+  width:30px; height:30px; border-radius:50%;
+  background:#3a1515; border:none; color:#cc7777; font-size:13px; cursor:pointer;
+}
+.tour-member-del:hover { background:#5a2020; color:#ff9999; }
+#btn-tour-add-member {
+  font-size:15px; padding:7px 18px; background:#111130;
+  border:2px dashed #4488cc; color:#aaddff; border-radius:6px; cursor:pointer;
+  align-self:flex-start;
+}
+#btn-tour-add-member:hover  { background:#1a2240; }
+#btn-tour-add-member:disabled { opacity:0.35; cursor:not-allowed; }
+
+/* 공통 버튼 */
+.btn-tour-primary {
+  font-size:22px; padding:0 50px; height:52px;
+  background:#f0c040; color:#000; border:none; border-radius:8px;
+  cursor:pointer; font-weight:bold;
+}
+.btn-tour-primary:hover { background:#ffe080; }
+.btn-tour-secondary {
+  font-size:18px; padding:0 24px; height:52px;
+  background:#1a1a2a; color:#aaa; border:2px solid #444; border-radius:8px;
+  cursor:pointer; font-weight:bold;
+}
+.btn-tour-secondary:hover { background:#2a2a3a; color:#fff; }
+
+/* 브래킷 */
+#bracket-top-bar {
+  display:flex; align-items:center; justify-content:space-between;
+  width:100%; flex-shrink:0;
+  padding:0 16px 0 20px;
+  padding-right:300px; /* 사운드 버튼 겹침 방지 */
+  box-sizing:border-box;
+}
+#bracket-title { font-size:28px; font-weight:bold; color:#f0c040; letter-spacing:2px; }
+
+/* 공지사항 전광판 */
+#bracket-rules-disp {
+  width:1860px; height:52px;
+  background:#0a0800; border:2px solid #f0c040;
+  border-radius:6px; flex-shrink:0; display:none;
+  overflow:hidden; position:relative;
+}
+#bracket-rules-ticker {
+  display:inline-block;
+  position:absolute; top:50%; transform:translateY(-50%);
+  white-space:nowrap;
+  font-size:22px; font-weight:bold; color:#f0c040;
+  letter-spacing:2px;
+  animation: tickerScroll 22s linear infinite;
+}
+@keyframes tickerScroll {
+  0%   { left:1860px; }
+  100% { left:-100%; }
+}
+
+/* 브래킷 메인 행 (팀 범례 + 스크롤 영역) */
+#bracket-main-row {
+  flex:1; display:flex; width:1920px; overflow:hidden;
+}
+#bracket-team-legend {
+  width:180px; flex-shrink:0;
+  display:flex; flex-direction:column;
+  padding:20px 14px; gap:14px;
+  background:#05050f; border-right:1px solid #1a1a2a;
+  overflow-y:auto;
+}
+.legend-team {
+  display:flex; align-items:center; gap:10px;
+}
+.legend-color {
+  width:18px; height:18px; border-radius:3px; flex-shrink:0;
+  border:1px solid rgba(255,255,255,0.3);
+}
+.legend-name {
+  font-size:15px; font-weight:bold; color:#ccc;
+  text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+#bracket-scroll {
+  overflow-x:auto; overflow-y:visible;
+  flex:1; display:flex;
+  align-items:flex-end; padding-bottom:10px;
+}
+#bracket-canvas-area { position:relative; flex-shrink:0; }
+
+/* 브래킷 박스 */
+.bracket-box {
+  position:absolute; display:flex; align-items:center; justify-content:center;
+  font-size:14px; font-weight:bold; border-radius:5px;
+  border:2px solid #1e2a3a; background:#0a0a1e; color:#fff;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:0 6px;
+  transition:filter 0.15s, opacity 0.15s;
+}
+.bracket-box-empty   { background:#06060f; border-color:#151520; color:#222; }
+.bracket-box-bye     { background:#04040a; border-color:#0e0e18; color:#1a1a28; }
+.bracket-box-waiting { background:#08081a; border-color:#1a1a2e; color:#333; }
+.bracket-box-active  { border-color:rgba(255,255,255,0.5); cursor:pointer; }
+.bracket-box-active:hover { filter:brightness(1.35); border-color:#fff; }
+.bracket-box-winner  { border-color:rgba(255,255,255,0.8); }
+.bracket-box-loser   { opacity:0.38; filter:grayscale(0.4); }
+.bracket-box-champion{ border-color:#f0c040; box-shadow:0 0 16px #f0c04077; font-size:16px; }
+
+#champion-banner {
+  font-size:26px; font-weight:bold; color:#f0c040;
+  text-shadow:0 0 18px #f0c040bb; display:none;
+  letter-spacing:2px; white-space:nowrap;
+}
+
+/* 모드 선택 화면 */
+#screen-tournament-mode { justify-content:center; gap:50px; }
+.mode-btn-row { display:flex; gap:40px; }
+.btn-tour-mode {
+  width:360px; height:200px;
+  font-size:24px; font-weight:bold; line-height:1.5;
+  border-radius:14px; cursor:pointer;
+  border:3px solid #4488cc; background:#080e1a; color:#aaddff;
+  transition:all 0.15s;
+}
+.btn-tour-mode:hover { background:#142240; border-color:#88bbff; color:#fff; }
+.btn-tour-mode.mode-random { border-color:#44cc88; color:#aaffcc; background:#071410; }
+.btn-tour-mode.mode-random:hover { background:#0d2a18; border-color:#88ffcc; color:#fff; }
+.mode-desc { font-size:15px; color:#aaa; margin-top:10px; }
+
+/* 랜덤 팀 모드 — 참가자 입력 */
+#screen-tournament-rand-players { justify-content:center; gap:18px; padding:40px; }
+#rand-player-list { display:flex; flex-direction:column; gap:8px; width:420px; max-height:480px; overflow-y:auto; }
+.rand-player-row { display:flex; gap:10px; align-items:center; }
+.rand-player-input { font-size:19px; padding:9px 13px; border:2px solid #4488cc; background:#111130; color:#fff; border-radius:6px; outline:none; flex:1; }
+.rand-player-input:focus { border-color:#66aaff; }
+.rand-player-del { width:30px; height:30px; border-radius:50%; background:#3a1515; border:none; color:#cc7777; font-size:13px; cursor:pointer; }
+.rand-player-del:hover { background:#5a2020; color:#ff9999; }
+#btn-rand-add-player { font-size:15px; padding:7px 18px; background:#111130; border:2px dashed #4488cc; color:#aaddff; border-radius:6px; cursor:pointer; align-self:flex-start; }
+#btn-rand-add-player:hover { background:#1a2240; }
+#rand-player-count-disp { font-size:16px; color:#aaddff88; }
+
+/* 랜덤 팀 모드 — 팀 설정 */
+#screen-tournament-rand-teams { justify-content:center; gap:22px; padding:40px; }
+#rand-team-inputs { display:flex; flex-direction:column; gap:9px; width:560px; }
+
 /* 사운드 토글 버튼 */
 #btn-sound {
   position:absolute; top:16px; right:16px;
@@ -332,13 +569,18 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
 <audio id="sfx-hover"  src="Music/Mouse_over.wav"></audio>
 <audio id="sfx-cha"    src="Music/selectCha.mp3"></audio>
 <audio id="sfx-team"   src="Music/selectTeam.wav"></audio>
+<audio id="sfx-winner" src="Music/winner.wav"></audio>
 
 <div id="app">
 <button id="btn-sound">🔊 Sound ON</button>
 
   <!-- 화면1: 이름입력 -->
   <div id="screen-name" class="screen active">
-    <input id="name-input" type="text" placeholder="플레이어 이름 입력" maxlength="20">
+    <div id="name-row">
+      <button class="btn-side" id="btn-tournament">대회 모드</button>
+      <input id="name-input" type="text" placeholder="플레이어 이름 입력" maxlength="20">
+      <button class="btn-side" id="btn-dup-toggle">캐릭터 중복 불가</button>
+    </div>
     <div id="btn-grid">
       <!-- 행1: 등급 선택 -->
       <div class="btn-row" style="position:relative;">
@@ -359,6 +601,103 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
         <button class="btn-cell btn-rand-team" id="btn-rand-orig">팀 랜덤<br>(오리지널)</button>
         <button class="btn-cell btn-start" id="btn-name-ok">시작</button>
       </div>
+    </div>
+  </div>
+
+  <!-- 화면A: 대회 모드 선택 -->
+  <div id="screen-tournament-mode" class="screen">
+    <div class="tour-title">대회 모드</div>
+    <div class="mode-btn-row">
+      <button class="btn-tour-mode mode-random" id="btn-mode-random">
+        전원 랜덤 팀 모드<br>
+        <span class="mode-desc">참가자 입력 후<br>팀을 자동 랜덤 배정</span>
+      </button>
+      <button class="btn-tour-mode" id="btn-mode-manual">
+        팀원 배치 모드<br>
+        <span class="mode-desc">팀을 먼저 만들고<br>팀원을 직접 배치</span>
+      </button>
+    </div>
+    <button class="btn-tour-secondary" id="btn-mode-back">← 돌아가기</button>
+  </div>
+
+  <!-- 화면B: 랜덤 팀 모드 — 참가자 입력 -->
+  <div id="screen-tournament-rand-players" class="screen">
+    <div class="tour-title">참가자 입력</div>
+    <div class="tour-subtitle" id="rand-player-count-disp">0명 입력됨</div>
+    <div id="rand-player-list"></div>
+    <button id="btn-rand-add-player">+ 참가자 추가</button>
+    <div style="display:flex;gap:14px;">
+      <button class="btn-tour-secondary" id="btn-rand-players-back">← 돌아가기</button>
+      <button class="btn-tour-primary" id="btn-rand-players-next">팀 설정 →</button>
+    </div>
+  </div>
+
+  <!-- 화면C: 랜덤 팀 모드 — 팀 설정 -->
+  <div id="screen-tournament-rand-teams" class="screen">
+    <div class="tour-title">팀 설정</div>
+    <div class="tour-count-row">
+      <button class="tour-count-btn" id="btn-rand-tc-minus">−</button>
+      <span class="tour-count-val" id="rand-tc-val">2</span>
+      <span>팀</span>
+      <button class="tour-count-btn" id="btn-rand-tc-plus">+</button>
+    </div>
+    <div id="rand-team-inputs"></div>
+    <div class="tour-rules-wrap">
+      <div class="tour-rules-label">대회 규칙 메모 (선택)</div>
+      <textarea id="rand-tour-rules" placeholder="대회 규칙, 공지사항 등을 입력하세요..."></textarea>
+    </div>
+    <div style="display:flex;gap:14px;">
+      <button class="btn-tour-secondary" id="btn-rand-teams-back">← 참가자 수정</button>
+      <button class="btn-tour-primary" id="btn-rand-teams-start">토너먼트 시작 →</button>
+    </div>
+  </div>
+
+  <!-- 화면4: 대회 설정 (팀 수 + 팀 이름) — 팀원 배치 모드 -->
+  <div id="screen-tournament-setup" class="screen">
+    <div class="tour-title">팀원 배치 모드</div>
+    <div class="tour-count-row">
+      <button class="tour-count-btn" id="btn-tour-count-minus">−</button>
+      <span class="tour-count-val" id="tour-team-count-val">4</span>
+      <span>팀 참가</span>
+      <button class="tour-count-btn" id="btn-tour-count-plus">+</button>
+    </div>
+    <div id="tour-team-inputs"></div>
+    <div class="tour-rules-wrap">
+      <div class="tour-rules-label">대회 규칙 메모 (선택)</div>
+      <textarea id="tour-rules" placeholder="대회 규칙, 공지사항 등을 입력하세요..."></textarea>
+    </div>
+    <div style="display:flex;gap:14px;">
+      <button class="btn-tour-secondary" id="btn-tour-setup-back">← 돌아가기</button>
+      <button class="btn-tour-primary" id="btn-tour-setup-next">팀원 입력 →</button>
+    </div>
+  </div>
+
+  <!-- 화면5: 팀원 입력 -->
+  <div id="screen-tournament-members" class="screen">
+    <div id="tour-member-title"></div>
+    <div id="tour-member-progress" class="tour-subtitle"></div>
+    <div id="tour-member-inputs"></div>
+    <button id="btn-tour-add-member">+ 팀원 추가</button>
+    <div style="display:flex;gap:14px;">
+      <button class="btn-tour-secondary" id="btn-tour-member-back">← 이전</button>
+      <button class="btn-tour-primary" id="btn-tour-member-next">다음 팀 →</button>
+    </div>
+  </div>
+
+  <!-- 화면6: 브래킷 -->
+  <div id="screen-tournament-bracket" class="screen">
+    <div id="bracket-top-bar">
+      <div id="bracket-title">토너먼트</div>
+      <div id="champion-banner"></div>
+      <div style="display:flex;gap:12px;">
+        <button class="btn-tour-secondary" id="btn-tour-bracket-back">← 수정</button>
+        <button class="btn-tour-secondary" id="btn-tour-bracket-home">처음으로</button>
+      </div>
+    </div>
+    <div id="bracket-rules-disp"><span id="bracket-rules-ticker"></span></div>
+    <div id="bracket-main-row">
+      <div id="bracket-team-legend"></div>
+      <div id="bracket-scroll"><div id="bracket-canvas-area"></div></div>
     </div>
   </div>
 
@@ -505,13 +844,17 @@ let usedNames   = new Set();
 
 // ── BGM / SFX ──
 const bgmMap = {
-  'screen-name':   document.getElementById('bgm-title'),
-  'screen-select': document.getElementById('bgm-select'),
-  'screen-result': document.getElementById('bgm-clear'),
+  'screen-name':               document.getElementById('bgm-title'),
+  'screen-tournament-setup':   document.getElementById('bgm-title'),
+  'screen-tournament-members': document.getElementById('bgm-title'),
+  'screen-tournament-bracket': document.getElementById('bgm-title'),
+  'screen-select':             document.getElementById('bgm-select'),
+  'screen-result':             document.getElementById('bgm-clear'),
 };
-const sfxHover = document.getElementById('sfx-hover');
-const sfxCha   = document.getElementById('sfx-cha');
-const sfxTeam  = document.getElementById('sfx-team');
+const sfxHover  = document.getElementById('sfx-hover');
+const sfxCha    = document.getElementById('sfx-cha');
+const sfxTeam   = document.getElementById('sfx-team');
+const sfxWinner = document.getElementById('sfx-winner');
 
 let currentBGM = null;
 let soundOn = true;
@@ -978,6 +1321,694 @@ document.getElementById('btn-restart').addEventListener('click', () => {
   document.getElementById('name-input').value = '';
   showScreen('screen-name');
 });
+
+// ── 캐릭터 중복 가능 토글 ──
+let allowDuplicate = false;
+const btnDupToggle = document.getElementById('btn-dup-toggle');
+btnDupToggle.addEventListener('click', () => {
+  allowDuplicate = !allowDuplicate;
+  btnDupToggle.textContent = allowDuplicate ? '캐릭터 중복 가능' : '캐릭터 중복 불가';
+  btnDupToggle.classList.toggle('dup-on', allowDuplicate);
+});
+
+// confirmTeam 중복 허용 오버라이드
+window.confirmTeam = function(ti) {
+  if (ti !== activeTeam) return;
+  const picks = currentPick[ti];
+  if (picks.length < TEAM_SIZE) return;
+  teams[ti] = [...picks];
+  if (!allowDuplicate) picks.forEach(c => usedNames.add(c.name));
+  playSFX(sfxTeam);
+  const next = teams.findIndex((t,i) => t === null && i > ti);
+  if (next !== -1) { activeTeam = next; updateUI(); }
+  else showResult();
+};
+
+// ══════════════════════════════════════
+// 대회 모드
+// ══════════════════════════════════════
+const TEAM_COLOR_PRESETS = [
+  '#cc2233', // 빨강
+  '#dd7700', // 주황
+  '#aaaa00', // 노랑
+  '#228844', // 초록
+  '#2255cc', // 파랑
+  '#9922bb', // 보라
+];
+// 라운드별 승자 라인 네온 색상 (r=0→1 이 1라운드)
+const ROUND_LINE_COLORS = ['#00ff88','#0099ff','#ff3355','#f0c040'];
+
+let tourTeamCount   = 4;
+let tourTeams       = []; // [{name, color, members:[]}]
+let tourMemberIdx   = 0;
+let tourRules       = '';
+let playerTeamMap   = {}; // playerName → teamIndex
+
+// ── 브래킷 상태 ──
+let bracketGrid   = [];
+let bracketNumRows = 0;
+let bracketSlots   = 0;
+
+function nextPow2(n){ let p=1; while(p<n) p<<=1; return p; }
+
+// ── 설정 화면 ──
+function renderSetupInputs() {
+  const ct = document.getElementById('tour-team-inputs');
+  const prev = [...ct.querySelectorAll('.tour-team-input')].map(i=>i.value);
+  const prevColors = [...ct.querySelectorAll('.tour-color-swatch.selected')].map(s=>s.dataset.color);
+  ct.innerHTML = '';
+  for(let i=0;i<tourTeamCount;i++){
+    const defaultColor = prevColors[i] || TEAM_COLOR_PRESETS[i % TEAM_COLOR_PRESETS.length];
+    const row = document.createElement('div');
+    row.className = 'tour-team-row';
+    row.dataset.idx = i;
+    // 컬러 스와치 HTML
+    const swatches = TEAM_COLOR_PRESETS.map(c =>
+      `<div class="tour-color-swatch${c===defaultColor?' selected':''}" data-color="${c}" style="background:${c};" onclick="selectTeamColor(${i},this)"></div>`
+    ).join('');
+    row.innerHTML = `<span class="tour-team-label">팀 ${i+1}</span>
+      <input class="tour-team-input" type="text" placeholder="팀 이름" maxlength="14" value="${prev[i]||''}">
+      <div class="tour-color-swatches">${swatches}</div>`;
+    ct.appendChild(row);
+  }
+  document.getElementById('tour-team-count-val').textContent = tourTeamCount;
+  document.getElementById('btn-tour-count-minus').disabled = tourTeamCount <= 2;
+  document.getElementById('btn-tour-count-plus').disabled  = tourTeamCount >= 6;
+}
+
+function selectTeamColor(rowIdx, el) {
+  const row = document.querySelector(`.tour-team-row[data-idx="${rowIdx}"]`);
+  row.querySelectorAll('.tour-color-swatch').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+document.getElementById('btn-tournament').addEventListener('click', ()=>{
+  showScreen('screen-tournament-mode');
+});
+// 모드 선택
+document.getElementById('btn-mode-back').addEventListener('click', ()=> showScreen('screen-name'));
+document.getElementById('btn-mode-manual').addEventListener('click', ()=>{
+  tourMode = 'manual';
+  renderSetupInputs();
+  showScreen('screen-tournament-setup');
+});
+document.getElementById('btn-mode-random').addEventListener('click', ()=>{
+  tourMode = 'random';
+  renderRandPlayerList();
+  showScreen('screen-tournament-rand-players');
+});
+
+document.getElementById('btn-tour-setup-back').addEventListener('click', ()=> showScreen('screen-tournament-mode'));
+
+document.getElementById('btn-tour-count-minus').addEventListener('click', ()=>{
+  if(tourTeamCount>2){ tourTeamCount--; renderSetupInputs(); }
+});
+document.getElementById('btn-tour-count-plus').addEventListener('click', ()=>{
+  if(tourTeamCount<6){ tourTeamCount++; renderSetupInputs(); }
+});
+
+document.getElementById('btn-tour-setup-next').addEventListener('click', ()=>{
+  const rows   = [...document.querySelectorAll('.tour-team-row')];
+  const names  = rows.map(r=>r.querySelector('.tour-team-input').value.trim());
+  if(names.some(n=>!n)){ alert('모든 팀 이름을 입력해주세요.'); return; }
+  if(new Set(names).size < names.length){ alert('팀 이름이 중복됩니다.'); return; }
+  const colors = rows.map(r=>{
+    const sel = r.querySelector('.tour-color-swatch.selected');
+    return sel ? sel.dataset.color : TEAM_COLOR_PRESETS[0];
+  });
+  // 기존 members 유지
+  tourTeams = names.map((n,i)=>({
+    name: n,
+    color: colors[i],
+    members: tourTeams[i]?.members || [],
+  }));
+  tourRules = document.getElementById('tour-rules').value.trim();
+  showMemberInput(0);
+});
+
+// ── 팀원 입력 화면 ──
+function showMemberInput(idx){
+  tourMemberIdx = idx;
+  const team = tourTeams[idx];
+  document.getElementById('tour-member-title').textContent = `${team.name}`;
+  document.getElementById('tour-member-progress').textContent = `팀원 입력 — ${idx+1} / ${tourTeams.length}팀`;
+  const isLast = idx === tourTeams.length-1;
+  document.getElementById('btn-tour-member-next').textContent = isLast ? '토너먼트 시작 →' : '다음 팀 →';
+  // 기존 멤버 복원 or 기본 2칸
+  const existing = team.members.length ? team.members : ['',''];
+  const ct = document.getElementById('tour-member-inputs');
+  ct.innerHTML='';
+  existing.forEach(v=> addMemberRow(v));
+  updateAddBtn();
+  showScreen('screen-tournament-members');
+}
+
+function addMemberRow(val=''){
+  const ct = document.getElementById('tour-member-inputs');
+  const row = document.createElement('div');
+  row.className='tour-member-row';
+  row.innerHTML=`<input class="tour-member-input" type="text" placeholder="팀원 이름" maxlength="12" value="${val}">
+    <button class="tour-member-del" onclick="delMemberRow(this)">✕</button>`;
+  ct.appendChild(row);
+  updateAddBtn();
+}
+function delMemberRow(btn){
+  const ct=document.getElementById('tour-member-inputs');
+  if(ct.children.length<=1) return;
+  btn.parentElement.remove(); updateAddBtn();
+}
+function updateAddBtn(){
+  const n=document.getElementById('tour-member-inputs').children.length;
+  document.getElementById('btn-tour-add-member').disabled = n>=8;
+}
+
+document.getElementById('btn-tour-add-member').addEventListener('click', ()=> addMemberRow());
+
+document.getElementById('btn-tour-member-back').addEventListener('click', ()=>{
+  // 현재 멤버 임시 저장
+  saveCurMembers();
+  if(tourMemberIdx===0) showScreen('screen-tournament-setup');
+  else showMemberInput(tourMemberIdx-1);
+});
+
+document.getElementById('btn-tour-member-next').addEventListener('click', ()=>{
+  const members = saveCurMembers();
+  if(!members){ return; }
+  const isLast = tourMemberIdx === tourTeams.length-1;
+  if(isLast){
+    // 홀수 참가자면 마지막 팀의 마지막 멤버가 부전승
+    const allMembers = tourTeams.flatMap(t=>t.members);
+    const byePlayer = (allMembers.length%2===1) ? allMembers[allMembers.length-1] : null;
+    startTournament(byePlayer);
+  } else {
+    showMemberInput(tourMemberIdx+1);
+  }
+});
+
+function saveCurMembers(){
+  const inputs = [...document.querySelectorAll('.tour-member-input')];
+  const members = inputs.map(i=>i.value.trim()).filter(Boolean);
+  if(members.length<1){ alert('팀원을 1명 이상 입력해주세요.'); return null; }
+  tourTeams[tourMemberIdx].members = members;
+  return members;
+}
+
+// ═══════════════════════════════════════
+// 랜덤 팀 모드
+// ═══════════════════════════════════════
+let tourMode      = 'manual';
+let randPlayers   = [];        // 참가자 이름 목록
+let randTeamCount = 2;
+
+// BGM 매핑 추가
+bgmMap['screen-tournament-mode']         = document.getElementById('bgm-title');
+bgmMap['screen-tournament-rand-players'] = document.getElementById('bgm-title');
+bgmMap['screen-tournament-rand-teams']   = document.getElementById('bgm-title');
+
+// ── 참가자 목록 화면 ──
+function renderRandPlayerList(){
+  const ct = document.getElementById('rand-player-list');
+  const prev = [...ct.querySelectorAll('.rand-player-input')].map(i=>i.value);
+  ct.innerHTML='';
+  const initial = randPlayers.length ? randPlayers : ['',''];
+  initial.forEach(v=> addRandPlayerRow(ct, v));
+  updateRandPlayerCount();
+}
+
+function addRandPlayerRow(ct, val=''){
+  if(!ct) ct = document.getElementById('rand-player-list');
+  const row = document.createElement('div');
+  row.className='rand-player-row';
+  row.innerHTML=`<input class="rand-player-input" type="text" placeholder="참가자 이름" maxlength="12" value="${val}">
+    <button class="rand-player-del" onclick="delRandPlayerRow(this)">✕</button>`;
+  ct.appendChild(row);
+  updateRandPlayerCount();
+}
+function delRandPlayerRow(btn){
+  const ct=document.getElementById('rand-player-list');
+  if(ct.children.length<=1) return;
+  btn.parentElement.remove(); updateRandPlayerCount();
+}
+function updateRandPlayerCount(){
+  const n=document.getElementById('rand-player-list').children.length;
+  document.getElementById('rand-player-count-disp').textContent=`${n}명 입력됨`;
+}
+
+document.getElementById('btn-rand-add-player').addEventListener('click',()=>
+  addRandPlayerRow(document.getElementById('rand-player-list')));
+document.getElementById('btn-rand-players-back').addEventListener('click',()=>
+  showScreen('screen-tournament-mode'));
+document.getElementById('btn-rand-players-next').addEventListener('click',()=>{
+  const inputs=[...document.querySelectorAll('.rand-player-input')];
+  randPlayers=inputs.map(i=>i.value.trim()).filter(Boolean);
+  if(randPlayers.length<2){ alert('참가자를 2명 이상 입력해주세요.'); return; }
+  if(new Set(randPlayers).size<randPlayers.length){ alert('이름이 중복됩니다.'); return; }
+  renderRandTeamInputs();
+  showScreen('screen-tournament-rand-teams');
+});
+
+// ── 랜덤 팀 설정 화면 ──
+function renderRandTeamInputs(){
+  const ct=document.getElementById('rand-team-inputs');
+  const prev=[...ct.querySelectorAll('.tour-team-input')].map(i=>i.value);
+  const prevColors=[...ct.querySelectorAll('.tour-color-swatch.selected')].map(s=>s.dataset.color);
+  ct.innerHTML='';
+  // 팀 수 최대 = 참가자 수 (최소 2, 최대 6)
+  randTeamCount=Math.min(randTeamCount, randPlayers.length, 6);
+  randTeamCount=Math.max(randTeamCount, 2);
+  for(let i=0;i<randTeamCount;i++){
+    const defColor=prevColors[i]||TEAM_COLOR_PRESETS[i%TEAM_COLOR_PRESETS.length];
+    const row=document.createElement('div');
+    row.className='tour-team-row';
+    row.dataset.idx=i;
+    const swatches=TEAM_COLOR_PRESETS.map(c=>
+      `<div class="tour-color-swatch${c===defColor?' selected':''}" data-color="${c}" style="background:${c};" onclick="selectRandTeamColor(${i},this)"></div>`
+    ).join('');
+    row.innerHTML=`<span class="tour-team-label">팀 ${i+1}</span>
+      <input class="tour-team-input" type="text" placeholder="팀 이름" maxlength="14" value="${prev[i]||''}">
+      <div class="tour-color-swatches">${swatches}</div>`;
+    ct.appendChild(row);
+  }
+  document.getElementById('rand-tc-val').textContent=randTeamCount;
+  document.getElementById('btn-rand-tc-minus').disabled=randTeamCount<=2;
+  document.getElementById('btn-rand-tc-plus').disabled =randTeamCount>=Math.min(randPlayers.length,6);
+}
+
+function selectRandTeamColor(idx, el){
+  const row=document.querySelector(`#rand-team-inputs .tour-team-row[data-idx="${idx}"]`);
+  row.querySelectorAll('.tour-color-swatch').forEach(s=>s.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+document.getElementById('btn-rand-tc-minus').addEventListener('click',()=>{
+  if(randTeamCount>2){ randTeamCount--; renderRandTeamInputs(); }
+});
+document.getElementById('btn-rand-tc-plus').addEventListener('click',()=>{
+  if(randTeamCount<Math.min(randPlayers.length,6)){ randTeamCount++; renderRandTeamInputs(); }
+});
+document.getElementById('btn-rand-teams-back').addEventListener('click',()=>{
+  renderRandPlayerList(); showScreen('screen-tournament-rand-players');
+});
+document.getElementById('btn-rand-teams-start').addEventListener('click',()=>{
+  const rows=[...document.querySelectorAll('#rand-team-inputs .tour-team-row')];
+  const names=rows.map(r=>r.querySelector('.tour-team-input').value.trim());
+  if(names.some(n=>!n)){ alert('모든 팀 이름을 입력해주세요.'); return; }
+  if(new Set(names).size<names.length){ alert('팀 이름이 중복됩니다.'); return; }
+  const colors=rows.map(r=>{
+    const sel=r.querySelector('.tour-color-swatch.selected');
+    return sel?sel.dataset.color:TEAM_COLOR_PRESETS[0];
+  });
+  tourRules=document.getElementById('rand-tour-rules').value.trim();
+  // 참가자 무작위 배정
+  const shuffled=[...randPlayers].sort(()=>Math.random()-0.5);
+  const T=randTeamCount;
+  const base=Math.floor(shuffled.length/T);
+  const extra=shuffled.length%T;
+  tourTeams=[];
+  let idx=0;
+  for(let i=0;i<T;i++){
+    const size=base+(i<extra?1:0);
+    tourTeams.push({name:names[i], color:colors[i], members:shuffled.slice(idx,idx+size)});
+    idx+=size;
+  }
+  // 홀수이면 마지막 참가자(shuffled 끝)가 부전승
+  const byePlayer = (shuffled.length%2===1) ? shuffled[shuffled.length-1] : null;
+  startTournament(byePlayer);
+});
+
+// ── 시드 배치 (같은 팀 1라운드 대전 회피, byePlayer는 BYE 슬롯에 배치) ──
+function seedPlayers(byePlayer=null){
+  const all = tourTeams.flatMap((t,ti)=> t.members.map(m=>({name:m,team:ti})));
+  const n   = all.length;
+  const slots = nextPow2(n);
+  const hasBye = n < slots;
+
+  // byePlayer를 분리
+  let byeEntry = null;
+  let seedable = all;
+  if(byePlayer && hasBye){
+    byeEntry = all.find(p=>p.name===byePlayer);
+    seedable  = all.filter(p=>p.name!==byePlayer);
+  }
+
+  // 300번 시도: 인접 쌍에 같은 팀 없도록 (byePlayer 제외 멤버로)
+  for(let attempt=0;attempt<300;attempt++){
+    const shuffled=[...seedable].sort(()=>Math.random()-0.5);
+    // byePlayer는 맨 뒤에 배치 → 마지막 null과 쌍을 이뤄 부전승
+    if(byeEntry) shuffled.push(byeEntry);
+    while(shuffled.length<slots) shuffled.push({name:null,team:-1});
+    let ok=true;
+    const checkLimit = byeEntry ? slots-2 : slots; // byePlayer 쌍만 제외
+    for(let i=0;i<checkLimit;i+=2){
+      if(shuffled[i].team>=0&&shuffled[i+1].team>=0&&shuffled[i].team===shuffled[i+1].team){
+        ok=false; break;
+      }
+    }
+    if(ok) return shuffled.map(p=>p.name);
+  }
+  // 폴백: posStep=1로 모든 슬롯 순서대로 배치
+  // byeEntry 있을 때는 slots-2 이전까지만 seedable 배치, 마지막에서 두번째에 byeEntry 삽입
+  const result=new Array(slots).fill(null);
+  let pos=0;
+  const fallbackLimit = byeEntry ? slots-2 : slots;
+  seedable.forEach(p=>{
+    while(pos<fallbackLimit&&result[pos]!==null) pos++;
+    if(pos<fallbackLimit){ result[pos]=p.name; pos++; }
+  });
+  if(byeEntry) result[slots-2]=byeEntry.name;
+  return result;
+}
+
+// ── BYE 슬롯 영구 판별 (해당 위치를 채울 round-0 시드가 전부 null) ──
+function isPermNull(r, i){
+  if(r===0) return bracketGrid[0][i]===null;
+  const stride=1<<r;
+  const start=i*stride, end=Math.min(start+stride, bracketGrid[0].length);
+  for(let j=start;j<end;j++) if(bracketGrid[0][j]!==null) return false;
+  return true;
+}
+
+// ── BYE 연쇄 진출 (영구 BYE 슬롯 상대방이면 자동 진출) ──
+function cascadeByes(){
+  let changed=true;
+  while(changed){
+    changed=false;
+    for(let r=0;r<bracketNumRows-1;r++){
+      for(let i=0;i<bracketGrid[r].length;i+=2){
+        const a=bracketGrid[r][i], b=bracketGrid[r][i+1];
+        const ni=i>>1;
+        if(bracketGrid[r+1]?.[ni]) continue;
+        if(a && !b && isPermNull(r,i+1)){ bracketGrid[r+1][ni]=a; changed=true; }
+        else if(!a && b && isPermNull(r,i)){ bracketGrid[r+1][ni]=b; changed=true; }
+      }
+    }
+  }
+}
+
+// ── 브래킷 초기화 ──
+function initBracket(seeds){
+  bracketSlots   = seeds.length;
+  bracketNumRows = Math.log2(bracketSlots)+1;
+  bracketGrid    = [];
+  for(let r=0;r<bracketNumRows;r++){
+    bracketGrid.push(new Array(bracketSlots>>r).fill(null));
+  }
+  bracketGrid[0] = [...seeds];
+  cascadeByes(); // BYE 연쇄 처리 (홀수 참가자 지원)
+}
+
+// ── 팀 범례 렌더 ──
+function renderTeamLegend(){
+  const el=document.getElementById('bracket-team-legend');
+  el.innerHTML='<div style="font-size:13px;color:#f0c04066;margin-bottom:4px;font-weight:bold;">참가 팀</div>';
+  tourTeams.forEach(t=>{
+    const row=document.createElement('div');
+    row.className='legend-team';
+    row.innerHTML=`<div class="legend-color" style="background:${t.color};"></div>
+      <div class="legend-name" title="${t.name}">${t.name} <span style="color:#f0c04099;font-size:12px;">(${t.members.length}명)</span></div>`;
+    el.appendChild(row);
+  });
+}
+
+// ── 브래킷 렌더링 (하단→상단) ──
+function renderBracketView(){
+  const area = document.getElementById('bracket-canvas-area');
+  area.innerHTML='';
+
+  const BH   = 44;
+  const CHAMP_SCALE = 2;  // 우승자 박스 배율
+  const topPad = BH * CHAMP_SCALE; // 우승 박스 공간 확보
+  const VGAP  = Math.min(140, Math.max(72, Math.floor((700 - bracketNumRows*BH) / Math.max(1,bracketNumRows-1))));
+  const slotW0 = Math.max(130, Math.floor(1760/bracketSlots));
+  const BW    = slotW0 - 10;
+  const containerW = slotW0 * bracketSlots;
+  const containerH = bracketNumRows*(BH+VGAP) - VGAP + 30 + topPad;
+
+  area.style.width  = containerW+'px';
+  area.style.height = containerH+'px';
+
+  // 좌표 헬퍼 (topPad로 모든 행 아래로 이동)
+  function rowY(r){ return containerH - BH - r*(BH+VGAP) - topPad; }
+  function cxOf(r,i){
+    const sw = containerW / (bracketSlots>>r);
+    return sw*i + sw/2;
+  }
+
+  // SVG
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('width', containerW);
+  svg.setAttribute('height', containerH);
+  svg.style.cssText='position:absolute;top:0;left:0;pointer-events:none;overflow:visible;';
+  area.appendChild(svg);
+
+  // ── 선 그리기 ──
+  for(let r=0;r<bracketNumRows-1;r++){
+    const cnt       = bracketSlots>>r;
+    const neonColor = ROUND_LINE_COLORS[Math.min(r, ROUND_LINE_COLORS.length-1)];
+    for(let i=0;i<cnt;i+=2){
+      const x1=cxOf(r,i), x2=cxOf(r,i+1), xp=cxOf(r+1,i>>1);
+      const childTop  = rowY(r);
+      // 우승 행이면 champion 박스가 2× 크기: 부모 박스 하단 계산
+      const isChampParent = (r+1 === bracketNumRows-1);
+      const pBH = isChampParent ? BH*CHAMP_SCALE : BH;
+      const pBy = isChampParent
+        ? rowY(r+1) - BH*(CHAMP_SCALE-1)   // 2× 박스는 위쪽으로 더 올라감
+        : rowY(r+1);
+      const parentBot = pBy + pBH;
+      const midY = Math.round((childTop + parentBot) / 2);
+
+      // 기본 흰색 선 (4개 세그먼트: 좌수직 + 우수직 + 수평 + 부모수직)
+      const fullPath =
+        `M${x1},${childTop} V${midY} ` +
+        `M${x2},${childTop} V${midY} ` +
+        `M${x1},${midY} H${x2} ` +
+        `M${xp},${midY} V${parentBot}`;
+      const baseLine = document.createElementNS('http://www.w3.org/2000/svg','path');
+      baseLine.setAttribute('d', fullPath);
+      baseLine.setAttribute('stroke','rgba(255,255,255,0.4)');
+      baseLine.setAttribute('stroke-width','1.5');
+      baseLine.setAttribute('fill','none');
+      svg.appendChild(baseLine);
+
+      // 승자 네온 선 (연속 경로: 승자 위치 → midY → 수평 → 부모)
+      const winner = bracketGrid[r+1]?.[i>>1];
+      if(winner){
+        const wSrc = (bracketGrid[r][i]===winner) ? i : i+1;
+        const wx   = cxOf(r, wSrc);
+        // 하나의 연속 경로: wx,childTop → wx,midY → xp,midY → xp,parentBot
+        const winPath = `M${wx},${childTop} V${midY} H${xp} V${parentBot}`;
+
+        // 글로우 (외각)
+        const glow = document.createElementNS('http://www.w3.org/2000/svg','path');
+        glow.setAttribute('d', winPath);
+        glow.setAttribute('stroke', neonColor);
+        glow.setAttribute('stroke-width','8');
+        glow.setAttribute('stroke-opacity','0.3');
+        glow.setAttribute('fill','none');
+        glow.setAttribute('stroke-linecap','round');
+        glow.setAttribute('stroke-linejoin','round');
+        svg.appendChild(glow);
+
+        // 코어
+        const core = document.createElementNS('http://www.w3.org/2000/svg','path');
+        core.setAttribute('d', winPath);
+        core.setAttribute('stroke', neonColor);
+        core.setAttribute('stroke-width','2.5');
+        core.setAttribute('fill','none');
+        core.setAttribute('stroke-linecap','round');
+        core.setAttribute('stroke-linejoin','round');
+        svg.appendChild(core);
+      }
+    }
+  }
+
+  // 라운드 레이블
+  const matchRounds = bracketNumRows-1;
+  const RLABELS = (()=>{
+    if(matchRounds===1) return ['결승','우승'];
+    if(matchRounds===2) return ['준결승','결승','우승'];
+    if(matchRounds===3) return ['8강','4강','결승','우승'];
+    if(matchRounds===4) return ['16강','8강','4강','결승','우승'];
+    return Array.from({length:matchRounds},(_,i)=>`${matchRounds-i}라운드`).concat(['우승']);
+  })();
+
+  // ── 박스 렌더링 ──
+  for(let r=0;r<bracketNumRows;r++){
+    const row=bracketGrid[r];
+    const isChampRow=(r===bracketNumRows-1);
+    for(let i=0;i<row.length;i++){
+      const player=row[i];
+      const teamIdx  = player!=null ? playerTeamMap[player] : -1;
+      const teamColor= (teamIdx>=0) ? tourTeams[teamIdx].color : null;
+
+      // 상태
+      let stateCls='';
+      let clickable=false;
+      if(isChampRow){
+        stateCls = player ? 'bracket-box-champion' : 'bracket-box-empty';
+      } else if(r===0 && !player){
+        stateCls='bracket-box-bye';
+      } else if(!player){
+        stateCls='bracket-box-empty';
+      } else {
+        const adv=bracketGrid[r+1]?.[i>>1];
+        if(adv===player)       stateCls='bracket-box-winner';
+        else if(adv)           stateCls='bracket-box-loser';
+        else if(row[i^1]!==null){ stateCls='bracket-box-active'; clickable=true; }
+        else                   stateCls='bracket-box-waiting';
+      }
+
+      // 우승 박스: 2× 크기, 위쪽으로 확장
+      const boxW = isChampRow ? BW*CHAMP_SCALE : BW;
+      const boxH = isChampRow ? BH*CHAMP_SCALE : BH;
+      const bx   = cxOf(r,i) - boxW/2;
+      const by   = isChampRow ? rowY(r) - BH*(CHAMP_SCALE-1) : rowY(r);
+
+      // 배경색 결정
+      let bgStyle='';
+      if(teamColor){
+        const alpha = stateCls==='bracket-box-loser' ? '0.38' : '1';
+        bgStyle=`background:${teamColor};border-color:rgba(255,255,255,${stateCls==='bracket-box-loser'?'0.15':'0.5'});color:#fff;opacity:${alpha};`;
+      }
+      const champBorder = isChampRow && player ? 'box-shadow:0 0 20px #f0c04099,0 0 40px #f0c04044;' : '';
+      const fontSize = isChampRow ? `font-size:28px;` : '';
+
+      const box=document.createElement('div');
+      box.className=`bracket-box ${stateCls}`;
+      box.style.cssText=`left:${bx}px;top:${by}px;width:${boxW}px;height:${boxH}px;${bgStyle}${champBorder}${fontSize}`;
+      box.textContent = player || '';
+
+      // 우승자 이름표 바로 위에 🏆 배너
+      if(isChampRow && player){
+        const champLbl=document.createElement('div');
+        champLbl.style.cssText=`position:absolute;left:${bx}px;top:${by-50}px;width:${boxW}px;`
+          +`text-align:center;font-size:35px;font-weight:bold;color:#f0c040;`
+          +`text-shadow:0 0 12px #f0c040aa;white-space:nowrap;pointer-events:none;`;
+        champLbl.textContent=`🏆 우승: ${player} 🏆`;
+        area.appendChild(champLbl);
+      }
+
+      // 라운드 레이블
+      if(i===0 && RLABELS[r]){
+        const lbl=document.createElement('span');
+        lbl.style.cssText='position:absolute;left:0;top:-17px;font-size:11px;color:#f0c04077;white-space:nowrap;pointer-events:none;';
+        lbl.textContent=RLABELS[r];
+        box.appendChild(lbl);
+      }
+
+      if(clickable) box.addEventListener('click',()=>advanceBracketPlayer(r,i));
+      area.appendChild(box);
+    }
+  }
+
+  // 우승 배너 (상단 바 숨김 — 캔버스 위에 직접 표시)
+  document.getElementById('champion-banner').style.display='none';
+}
+
+function advanceBracketPlayer(r,i){
+  const player=bracketGrid[r][i];
+  if(!player) return;
+  const nr=r+1, ni=i>>1;
+  if(nr>=bracketNumRows || bracketGrid[nr][ni]) return;
+  bracketGrid[nr][ni]=player;
+  cascadeByes();
+  renderBracketView();
+  if(nr===bracketNumRows-1){
+    playSFX(sfxWinner);
+    launchConfetti();
+  }
+}
+
+// ── 꽃가루 효과 ──
+function launchConfetti(){
+  const existing=document.getElementById('confetti-canvas');
+  if(existing) existing.remove();
+  const canvas=document.createElement('canvas');
+  canvas.id='confetti-canvas';
+  canvas.width=1920; canvas.height=1080;
+  canvas.style.cssText='position:absolute;top:0;left:0;pointer-events:none;z-index:500;';
+  document.getElementById('app').appendChild(canvas);
+  const ctx=canvas.getContext('2d');
+
+  const COLORS=['#f0c040','#ff4466','#00ff88','#0099ff','#ff88ff','#ffffff','#ffaa00','#44ffff'];
+  const particles=[];
+  for(let i=0;i<200;i++){
+    particles.push({
+      x: Math.random()*1920,
+      y: -20 - Math.random()*300,
+      vx:(Math.random()-0.5)*5,
+      vy: Math.random()*4+2,
+      vrot:(Math.random()-0.5)*8,
+      rot: Math.random()*360,
+      w:  Math.random()*14+6,
+      h:  Math.random()*7+4,
+      color: COLORS[Math.floor(Math.random()*COLORS.length)],
+    });
+  }
+
+  let frame=0;
+  const maxFrames=300;
+  function tick(){
+    ctx.clearRect(0,0,1920,1080);
+    const progress=frame/maxFrames;
+    particles.forEach(p=>{
+      p.x  += p.vx;
+      p.y  += p.vy;
+      p.rot+= p.vrot;
+      p.vy += 0.06;  // 중력
+      p.vx *= 0.995; // 공기 저항
+      const alpha = frame<200 ? 1 : 1-(progress-200/maxFrames)/(100/maxFrames);
+      ctx.save();
+      ctx.globalAlpha=Math.max(0, alpha);
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot*Math.PI/180);
+      ctx.fillStyle=p.color;
+      ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+      ctx.restore();
+    });
+    frame++;
+    if(frame<maxFrames) requestAnimationFrame(tick);
+    else canvas.remove();
+  }
+  tick();
+}
+
+function startTournament(byePlayer=null){
+  playerTeamMap={};
+  tourTeams.forEach((t,ti)=> t.members.forEach(m=>{ playerTeamMap[m]=ti; }));
+
+  const seeds=seedPlayers(byePlayer);
+  initBracket(seeds);
+
+  // 전광판 공지사항
+  let rulesText=tourRules||'';
+  if(byePlayer) rulesText=(rulesText ? rulesText+'     ※ 부전승: '+byePlayer : '※ 부전승: '+byePlayer);
+  const rulesEl=document.getElementById('bracket-rules-disp');
+  const ticker =document.getElementById('bracket-rules-ticker');
+  if(rulesText){
+    ticker.textContent=rulesText;
+    rulesEl.style.display='block';
+    // 텍스트 길이에 따라 스크롤 속도 조정
+    const speed=Math.max(80, rulesText.length*2.5);
+    ticker.style.animationDuration=speed+'s';
+  } else {
+    rulesEl.style.display='none';
+  }
+
+  document.getElementById('champion-banner').style.display='none';
+  renderTeamLegend();
+  showScreen('screen-tournament-bracket');
+  requestAnimationFrame(()=> renderBracketView());
+}
+
+document.getElementById('btn-tour-bracket-back').addEventListener('click',()=>{
+  if(tourMode==='random'){
+    renderRandTeamInputs(); showScreen('screen-tournament-rand-teams');
+  } else {
+    showMemberInput(tourTeams.length-1);
+  }
+});
+document.getElementById('btn-tour-bracket-home').addEventListener('click',()=> showScreen('screen-name'));
 </script>
 </body>
 </html>
