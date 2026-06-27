@@ -558,18 +558,42 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
 }
 #btn-save:hover { background:#66aaff; }
 #result-buttons { display:flex; gap:24px; }
+
+/* 팀원 팝업 */
+#team-member-popup {
+  display:none; position:fixed; z-index:9999;
+  background:#0d1a2e; border:2px solid #f0c040;
+  border-radius:10px; padding:18px 24px; min-width:180px;
+  box-shadow:0 0 24px #f0c04066;
+  pointer-events:auto;
+}
+#team-member-popup .pop-title {
+  font-size:17px; font-weight:bold; color:#f0c040;
+  margin-bottom:10px; border-bottom:1px solid #f0c04044; padding-bottom:6px;
+}
+#team-member-popup .pop-member {
+  font-size:15px; color:#ddeeff; padding:3px 0;
+}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
 <!-- BGM / SFX -->
-<audio id="bgm-title"  src="Music/01_title.mp3" loop></audio>
-<audio id="bgm-select" src="Music/02_select.mp3" loop></audio>
-<audio id="bgm-clear"  src="Music/03_clear.mp3"></audio>
+<audio id="bgm-title"   src="Music/01_title.mp3" loop></audio>
+<audio id="bgm-select"  src="Music/02_select.mp3" loop></audio>
+<audio id="bgm-clear"   src="Music/03_clear.mp3"></audio>
+<audio id="bgm-contest" src="Music/Contest.mp3" loop></audio>
 <audio id="sfx-hover"  src="Music/Mouse_over.wav"></audio>
 <audio id="sfx-cha"    src="Music/selectCha.mp3"></audio>
 <audio id="sfx-team"   src="Music/selectTeam.wav"></audio>
 <audio id="sfx-winner" src="Music/winner.wav"></audio>
+
+<!-- 팀원 팝업 -->
+<div id="team-member-popup">
+  <div class="pop-title" id="pop-team-name"></div>
+  <div id="pop-member-list"></div>
+</div>
 
 <div id="app">
 <button id="btn-sound">🔊 Sound ON</button>
@@ -690,6 +714,7 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
       <div id="bracket-title">토너먼트</div>
       <div id="champion-banner"></div>
       <div style="display:flex;gap:12px;">
+        <button class="btn-tour-secondary" id="btn-tour-bracket-save">📷 저장</button>
         <button class="btn-tour-secondary" id="btn-tour-bracket-back">← 수정</button>
         <button class="btn-tour-secondary" id="btn-tour-bracket-home">처음으로</button>
       </div>
@@ -844,12 +869,15 @@ let usedNames   = new Set();
 
 // ── BGM / SFX ──
 const bgmMap = {
-  'screen-name':               document.getElementById('bgm-title'),
-  'screen-tournament-setup':   document.getElementById('bgm-title'),
-  'screen-tournament-members': document.getElementById('bgm-title'),
-  'screen-tournament-bracket': document.getElementById('bgm-title'),
-  'screen-select':             document.getElementById('bgm-select'),
-  'screen-result':             document.getElementById('bgm-clear'),
+  'screen-name':                      document.getElementById('bgm-title'),
+  'screen-select':                    document.getElementById('bgm-select'),
+  'screen-result':                    document.getElementById('bgm-clear'),
+  'screen-tournament-mode':           document.getElementById('bgm-contest'),
+  'screen-tournament-setup':          document.getElementById('bgm-contest'),
+  'screen-tournament-members':        document.getElementById('bgm-contest'),
+  'screen-tournament-rand-players':   document.getElementById('bgm-contest'),
+  'screen-tournament-rand-teams':     document.getElementById('bgm-contest'),
+  'screen-tournament-bracket':        document.getElementById('bgm-contest'),
 };
 const sfxHover  = document.getElementById('sfx-hover');
 const sfxCha    = document.getElementById('sfx-cha');
@@ -2009,6 +2037,46 @@ document.getElementById('btn-tour-bracket-back').addEventListener('click',()=>{
   }
 });
 document.getElementById('btn-tour-bracket-home').addEventListener('click',()=> showScreen('screen-name'));
+
+// ── 브래킷 이미지 저장 ──
+document.getElementById('btn-tour-bracket-save').addEventListener('click', ()=>{
+  const target = document.getElementById('screen-tournament-bracket');
+  html2canvas(target, { backgroundColor:'#050010', scale:1, useCORS:true }).then(canvas=>{
+    const a = document.createElement('a');
+    a.download = `tournament_${Date.now()}.png`;
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  });
+});
+
+// ── 팀원 팝업 ──
+const teamPopup    = document.getElementById('team-member-popup');
+const popTeamName  = document.getElementById('pop-team-name');
+const popMemberList= document.getElementById('pop-member-list');
+
+function showTeamPopup(t, e){
+  popTeamName.textContent = t.name;
+  popMemberList.innerHTML = t.members.map(m=>`<div class="pop-member">· ${m}</div>`).join('');
+  // 팝업 위치: 클릭 위치 기준
+  const x = e.clientX + 14, y = e.clientY + 14;
+  teamPopup.style.left = Math.min(x, window.innerWidth-220)+'px';
+  teamPopup.style.top  = Math.min(y, window.innerHeight-200)+'px';
+  teamPopup.style.display = 'block';
+}
+document.addEventListener('click', e=>{
+  if(!teamPopup.contains(e.target)) teamPopup.style.display='none';
+});
+
+// renderTeamLegend 오버라이드: 클릭 이벤트 추가
+const _origRenderTeamLegend = renderTeamLegend;
+renderTeamLegend = function(){
+  _origRenderTeamLegend();
+  const el = document.getElementById('bracket-team-legend');
+  el.querySelectorAll('.legend-team').forEach((row, idx)=>{
+    row.style.cursor = 'pointer';
+    row.addEventListener('click', e=>{ e.stopPropagation(); showTeamPopup(tourTeams[idx], e); });
+  });
+};
 </script>
 </body>
 </html>
