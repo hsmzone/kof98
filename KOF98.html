@@ -1909,7 +1909,7 @@ function renderBracketView(){
       // 우승자 이름표 바로 위에 🏆 배너
       if(isChampRow && player){
         const champLbl=document.createElement('div');
-        champLbl.style.cssText=`position:absolute;left:${bx}px;top:${by-50}px;width:${boxW}px;`
+        champLbl.style.cssText=`position:absolute;left:${bx}px;top:${by-60}px;width:${boxW}px;`
           +`text-align:center;font-size:35px;font-weight:bold;color:#f0c040;`
           +`text-shadow:0 0 12px #f0c040aa;white-space:nowrap;pointer-events:none;`;
         champLbl.textContent=`🏆 우승: ${player} 🏆`;
@@ -2040,8 +2040,19 @@ document.getElementById('btn-tour-bracket-home').addEventListener('click',()=> s
 
 // ── 브래킷 이미지 저장 ──
 document.getElementById('btn-tour-bracket-save').addEventListener('click', ()=>{
-  const target = document.getElementById('screen-tournament-bracket');
-  html2canvas(target, { backgroundColor:'#050010', scale:1, useCORS:true }).then(canvas=>{
+  const app = document.getElementById('app');
+  // 캡처 전 scale 제거 → 1920×1080 원본 크기로 캡처
+  const savedTransform = app.style.transform;
+  const savedLeft      = app.style.left;
+  const savedTop       = app.style.top;
+  app.style.transform  = 'none';
+  app.style.left       = '0';
+  app.style.top        = '0';
+  html2canvas(app, { backgroundColor:'#050010', scale:1, useCORS:true, width:1920, height:1080 }).then(canvas=>{
+    // 복원
+    app.style.transform = savedTransform;
+    app.style.left      = savedLeft;
+    app.style.top       = savedTop;
     const a = document.createElement('a');
     a.download = `tournament_${Date.now()}.png`;
     a.href = canvas.toDataURL('image/png');
