@@ -604,6 +604,36 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
   text-shadow:0 0 20px #f0c040aa; line-height:1.6;
 }
 
+/* ══ 5층 탑 프리셋 ══ */
+#tower-preset-section {
+  display:none; flex-direction:column; align-items:center; gap:10px;
+  margin-top:10px;
+}
+#tower-preset-section.visible { display:flex; }
+.preset-label {
+  font-size:16px; color:#f0c04099; font-weight:bold; letter-spacing:2px;
+}
+#preset-list { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+.preset-btn-wrap { display:flex; align-items:center; gap:4px; }
+.preset-btn {
+  font-size:16px; font-weight:bold; padding:8px 20px;
+  background:#111130; border:2px solid #f0c040; color:#f0c040;
+  border-radius:8px; cursor:pointer;
+}
+.preset-btn:hover { background:#2a2a50; }
+.preset-del {
+  width:22px; height:22px; border-radius:50%;
+  background:#441111; border:1px solid #cc4444; color:#ff8888;
+  font-size:12px; cursor:pointer; line-height:22px; text-align:center;
+}
+.preset-del:hover { background:#662222; }
+#btn-save-preset {
+  font-size:18px; font-weight:bold; padding:10px 32px;
+  background:#224422; border:2px solid #44cc88; color:#aaffcc;
+  border-radius:8px; cursor:pointer; margin-top:6px;
+}
+#btn-save-preset:hover { background:#335533; }
+
 /* 팀원 팝업 */
 #team-member-popup {
   display:none; position:fixed; z-index:9999;
@@ -671,6 +701,11 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
         <button class="btn-cell btn-rand-team" id="btn-rand-orig">팀 랜덤<br>(오리지널)</button>
         <button class="btn-cell btn-start" id="btn-name-ok">시작</button>
       </div>
+    </div>
+    <!-- 5층 탑 프리셋 목록 -->
+    <div id="tower-preset-section">
+      <div class="preset-label">⚔ 저장된 탑</div>
+      <div id="preset-list"></div>
     </div>
   </div>
 
@@ -828,6 +863,7 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
     <div id="result-teams"></div>
     <div id="result-buttons">
       <button id="btn-save">이미지 저장</button>
+      <button id="btn-save-preset" style="display:none;">⚔ 탑 저장</button>
       <button id="btn-restart">처음으로</button>
     </div>
     <!-- 5층 탑 축하 팝업 -->
@@ -850,7 +886,7 @@ function fitScreen() {
   app.style.left = '50%';
   app.style.top  = '50%';
 }
-window.addEventListener('load',   fitScreen);
+window.addEventListener('load', () => { fitScreen(); renderPresetButtons(); });
 window.addEventListener('resize', fitScreen);
 
 // ── 데이터 ──
@@ -1315,7 +1351,12 @@ function showResult() {
   }
 
   showScreen('screen-result');
-  if (towerMode) playBGM('screen-tournament-bracket'); // 타워모드 결과화면: Contest.mp3
+  if (towerMode) {
+    playBGM('screen-tournament-bracket'); // 타워모드 결과화면: Contest.mp3
+    document.getElementById('btn-save-preset').style.display = '';
+  } else {
+    document.getElementById('btn-save-preset').style.display = 'none';
+  }
 }
 
 // ── 이벤트 ──
@@ -1503,6 +1544,75 @@ document.getElementById('btn-restart').addEventListener('click', () => {
   renderTeamArea();
   showScreen('screen-name');
 });
+
+// ── 5층 탑 프리셋 ──
+const PRESET_KEY = 'kof98_tower_presets';
+const MAX_PRESETS = 5;
+
+function loadTowerPresets() {
+  try { return JSON.parse(localStorage.getItem(PRESET_KEY)) || []; }
+  catch(e) { return []; }
+}
+
+function saveTowerPreset() {
+  const presets = loadTowerPresets();
+  if (presets.length >= MAX_PRESETS) {
+    alert(`최대 ${MAX_PRESETS}개까지 저장 가능합니다. 기존 프리셋을 삭제해주세요.`); return;
+  }
+  const name = prompt('저장할 탑 이름을 입력하세요:', `${playerName}의 탑`);
+  if (!name) return;
+  presets.push({ id: Date.now(), name, playerName, teams });
+  localStorage.setItem(PRESET_KEY, JSON.stringify(presets));
+  renderPresetButtons();
+  alert(`"${name}" 저장 완료!`);
+}
+
+function deleteTowerPreset(id) {
+  const presets = loadTowerPresets().filter(p => p.id !== id);
+  localStorage.setItem(PRESET_KEY, JSON.stringify(presets));
+  renderPresetButtons();
+}
+
+function renderPresetButtons() {
+  const presets = loadTowerPresets();
+  const section = document.getElementById('tower-preset-section');
+  const list    = document.getElementById('preset-list');
+  list.innerHTML = '';
+  if (presets.length === 0) { section.classList.remove('visible'); return; }
+  section.classList.add('visible');
+  presets.forEach(p => {
+    const wrap = document.createElement('div');
+    wrap.className = 'preset-btn-wrap';
+    const btn = document.createElement('button');
+    btn.className = 'preset-btn';
+    btn.textContent = p.name;
+    btn.addEventListener('click', () => applyTowerPreset(p));
+    const del = document.createElement('button');
+    del.className = 'preset-del';
+    del.textContent = '✕';
+    del.title = '삭제';
+    del.addEventListener('click', () => {
+      if (confirm(`"${p.name}" 를 삭제할까요?`)) deleteTowerPreset(p.id);
+    });
+    wrap.appendChild(btn);
+    wrap.appendChild(del);
+    list.appendChild(wrap);
+  });
+}
+
+function applyTowerPreset(preset) {
+  towerMode   = true;
+  NUM_TEAMS   = 5;
+  playerName  = preset.playerName;
+  teams       = preset.teams;
+  currentPick = Array.from({length:5}, () => []);
+  activeTeam  = 0;
+  usedNames   = new Set();
+  preset.teams.forEach(team => team.forEach(c => playerTeamMap && (playerTeamMap[c.name] = -1)));
+  showResult();
+}
+
+document.getElementById('btn-save-preset').addEventListener('click', saveTowerPreset);
 
 // ── 5층 탑 모드 ──
 document.getElementById('btn-tower').addEventListener('click', () => {
