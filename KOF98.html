@@ -355,7 +355,7 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
   height:48px; flex-shrink:0;
   display:flex; align-items:center;
   justify-content:space-between;
-  padding:0 50px;
+  padding:0 210px 0 50px; /* 우측 사운드 버튼 공간 확보 */
   background:#00000088;
   border-bottom:2px solid #f0c04055;
 }
@@ -559,6 +559,51 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
 #btn-save:hover { background:#66aaff; }
 #result-buttons { display:flex; gap:24px; }
 
+/* ══ 5층 탑 결과 화면 ══ */
+#screen-result.tower-result {
+  justify-content:center; padding:14px 120px; gap:6px;
+}
+#screen-result.tower-result #result-name { font-size:30px; margin-bottom:2px; }
+.tower-floor {
+  display:flex; align-items:center; gap:18px;
+  background:#111130cc; border:2px solid #f0c04066;
+  border-radius:10px; padding:10px 28px; width:1000px;
+  transition:filter 0.4s;
+}
+.tower-floor.defeated { filter:grayscale(1); opacity:0.45; }
+.tf-floor-label {
+  font-size:22px; font-weight:bold; color:#f0c040;
+  width:80px; flex-shrink:0; text-align:center;
+}
+.tower-floor .rt-char img { width:110px; height:110px; }
+.tower-floor .rt-char span { font-size:14px; }
+.tower-floor .rt-plus { font-size:24px; }
+.tower-floor .rt-total { font-size:20px; }
+.btn-defeat {
+  margin-left:auto; font-size:20px; font-weight:bold;
+  padding:10px 28px; background:#cc2233; color:#fff;
+  border:none; border-radius:8px; cursor:pointer; flex-shrink:0;
+}
+.btn-defeat:hover { background:#ff3344; }
+
+/* 축하 팝업 */
+#tower-clear-popup {
+  display:none; position:absolute; inset:0;
+  background:#00000099; z-index:500;
+  align-items:center; justify-content:center;
+}
+#tower-clear-popup.show { display:flex; }
+#tower-clear-box {
+  background:radial-gradient(ellipse,#1a1a4a,#05050f);
+  border:3px solid #f0c040; border-radius:16px;
+  padding:50px 80px; text-align:center;
+  box-shadow:0 0 60px #f0c04066;
+}
+#tower-clear-msg {
+  font-size:36px; font-weight:bold; color:#f0c040;
+  text-shadow:0 0 20px #f0c040aa; line-height:1.6;
+}
+
 /* 팀원 팝업 */
 #team-member-popup {
   display:none; position:fixed; z-index:9999;
@@ -601,6 +646,7 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
   <!-- 화면1: 이름입력 -->
   <div id="screen-name" class="screen active">
     <div id="name-row">
+      <button class="btn-side" id="btn-tower">5층 탑</button>
       <button class="btn-side" id="btn-tournament">대회 모드</button>
       <input id="name-input" type="text" placeholder="플레이어 이름 입력" maxlength="20">
       <button class="btn-side" id="btn-dup-toggle">캐릭터 중복 불가</button>
@@ -731,7 +777,7 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
     <div id="sel-header">
       <div class="h-title">KOF98</div>
       <div class="h-team" id="h-team-ind">팀 1 선택 중</div>
-      <div class="h-score">남은 점수: <span id="h-score-val">21</span> / <span id="h-score-max">21</span></div>
+      <div id="h-score-wrap" class="h-score">남은 점수: <span id="h-score-val">21</span> / <span id="h-score-max">21</span></div>
     </div>
     <div id="grid-area">
       <div id="char-grid"></div>
@@ -783,6 +829,12 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
     <div id="result-buttons">
       <button id="btn-save">이미지 저장</button>
       <button id="btn-restart">처음으로</button>
+    </div>
+    <!-- 5층 탑 축하 팝업 -->
+    <div id="tower-clear-popup">
+      <div id="tower-clear-box">
+        <div id="tower-clear-msg"></div>
+      </div>
     </div>
   </div>
 
@@ -860,6 +912,8 @@ const CHARS = [RANDOM_CHAR, ...CHARS_RAW];
 const IMG_BASE = './Team/';
 let MAX_SCORE = 21;
 const TEAM_SIZE = 3;
+let towerMode  = false;
+let NUM_TEAMS  = 3;
 
 let playerName = '';
 let teams       = [null, null, null];
@@ -1070,17 +1124,41 @@ function confirmTeam(ti) {
   else showResult();
 }
 
+// ── 팀 프레임 동적 렌더링 ──
+function renderTeamArea() {
+  const area = document.getElementById('team-area');
+  area.innerHTML = '';
+  for (let t = 0; t < NUM_TEAMS; t++) {
+    const frame = document.createElement('div');
+    frame.className = 'team-frame' + (t === 0 ? ' active-tf' : '');
+    frame.id = `tf-${t}`;
+    frame.innerHTML = `
+      <div class="tf-top">
+        <div class="tf-label">팀 ${t+1}</div>
+        <div class="tf-score">점수: <span id="tf-score-${t}">0</span>${towerMode ? '' : ` / <span class="tf-score-max">${MAX_SCORE}</span>`}</div>
+      </div>
+      <div class="tf-slots" id="tfs-${t}">
+        ${[0,1,2].map(si=>`<div class="tf-slot" id="ts-${t}-${si}"><span>?</span><button class="tf-remove" onclick="removeSlot(${t},${si})">✕</button></div>`).join('')}
+      </div>
+      <button class="btn-confirm" id="btn-c-${t}" disabled onclick="confirmTeam(${t})">팀 확정</button>
+    `;
+    area.appendChild(frame);
+  }
+}
+
 // ── UI 전체 갱신 ──
 function updateUI() {
   const ti = activeTeam;
   document.getElementById('h-team-ind').textContent = `팀 ${ti+1} 선택 중`;
+  const scoreEl = document.getElementById('h-score-wrap');
+  if (scoreEl) scoreEl.style.display = towerMode ? 'none' : '';
   document.getElementById('h-score-max').textContent = MAX_SCORE;
   document.getElementById('h-score-val').textContent = MAX_SCORE - currentScore(ti);
   document.querySelectorAll('.tf-score-max').forEach(el => {
     el.textContent = MAX_SCORE;
   });
 
-  for (let t = 0; t < 3; t++) {
+  for (let t = 0; t < NUM_TEAMS; t++) {
     const tf  = document.getElementById(`tf-${t}`);
     const btn = document.getElementById(`btn-c-${t}`);
     tf.classList.remove('active-tf','done-tf');
@@ -1150,25 +1228,94 @@ function renderTSlots(ti, picks, done) {
 
 // ── 결과 화면 ──
 function showResult() {
-  document.getElementById('result-name').textContent = playerName;
+  const resultEl = document.getElementById('screen-result');
   const container = document.getElementById('result-teams');
   container.innerHTML = '';
-  teams.forEach((team, ti) => {
-    const div = document.createElement('div');
-    div.className = 'result-team';
-    div.innerHTML = `<div class="rt-label">팀 ${ti+1}</div>`;
-    team.forEach((char, ci) => {
-      if (ci > 0) div.innerHTML += `<div class="rt-plus">+</div>`;
-      div.innerHTML += `<div class="rt-char">
-        <img src="${IMG_BASE}${char.file}" alt="${char.name}">
-        <span>${char.name} (${char.score}점)</span>
-      </div>`;
+  document.getElementById('tower-clear-popup').classList.remove('show');
+
+  if (towerMode) {
+    // ── 5층 탑 결과 ──
+    resultEl.classList.add('tower-result');
+    document.getElementById('result-name').textContent = `${playerName}의 탑`;
+
+    let currentFloor = 0; // 현재 격퇴 가능한 층 인덱스 (0=1층)
+
+    // 5층이 맨 위, 1층이 맨 아래 → 역순으로 DOM 삽입
+    const floorEls = [];
+    teams.forEach((team, ti) => {
+      const floor = document.createElement('div');
+      floor.className = 'tower-floor';
+      floor.id = `tower-floor-${ti}`;
+      let html = `<div class="tf-floor-label">${ti+1}층</div>`;
+      team.forEach((char, ci) => {
+        if (ci > 0) html += `<div class="rt-plus">+</div>`;
+        html += `<div class="rt-char">
+          <img src="${IMG_BASE}${char.file}" alt="${char.name}">
+          <span>${char.name}</span>
+        </div>`;
+      });
+      html += `<div class="rt-total" style="margin-left:auto;"></div>`;
+      floor.innerHTML = html;
+      floorEls.push(floor);
     });
-    const total = team.reduce((s,c)=>s+c.score,0);
-    div.innerHTML += `<div class="rt-total">합계: ${total}점</div>`;
-    container.appendChild(div);
-  });
+
+    // 역순 삽입 (5층→1층 순서, 1층이 화면 아래)
+    for (let i = floorEls.length - 1; i >= 0; i--) {
+      container.appendChild(floorEls[i]);
+    }
+
+    function attachDefeatBtn(floorIdx) {
+      const floorEl = document.getElementById(`tower-floor-${floorIdx}`);
+      const totalDiv = floorEl.querySelector('.rt-total');
+      totalDiv.innerHTML = '';
+      const btn = document.createElement('button');
+      btn.className = 'btn-defeat';
+      btn.textContent = '격퇴';
+      btn.addEventListener('click', () => {
+        playSFX(sfxCha);
+        floorEl.classList.add('defeated');
+        btn.remove();
+        currentFloor++;
+        if (currentFloor < NUM_TEAMS) {
+          attachDefeatBtn(currentFloor);
+        } else {
+          // 전체 격퇴 완료
+          const popup = document.getElementById('tower-clear-popup');
+          document.getElementById('tower-clear-msg').innerHTML =
+            `🏆<br>${playerName}의 탑을<br>공략하였습니다!`;
+          playSFX(sfxWinner);
+          popup.classList.add('show');
+          popup.addEventListener('click', () => popup.classList.remove('show'), {once:true});
+        }
+      });
+      totalDiv.appendChild(btn);
+    }
+
+    attachDefeatBtn(0); // 1층부터 시작
+
+  } else {
+    // ── 일반 결과 ──
+    resultEl.classList.remove('tower-result');
+    document.getElementById('result-name').textContent = playerName;
+    teams.forEach((team, ti) => {
+      const div = document.createElement('div');
+      div.className = 'result-team';
+      div.innerHTML = `<div class="rt-label">팀 ${ti+1}</div>`;
+      team.forEach((char, ci) => {
+        if (ci > 0) div.innerHTML += `<div class="rt-plus">+</div>`;
+        div.innerHTML += `<div class="rt-char">
+          <img src="${IMG_BASE}${char.file}" alt="${char.name}">
+          <span>${char.name} (${char.score}점)</span>
+        </div>`;
+      });
+      const total = team.reduce((s,c)=>s+c.score,0);
+      div.innerHTML += `<div class="rt-total">합계: ${total}점</div>`;
+      container.appendChild(div);
+    });
+  }
+
   showScreen('screen-result');
+  if (towerMode) playBGM('screen-tournament-bracket'); // 타워모드 결과화면: Contest.mp3
 }
 
 // ── 이벤트 ──
@@ -1310,6 +1457,10 @@ document.getElementById('btn-name-ok').addEventListener('click', () => {
   const v = document.getElementById('name-input').value.trim();
   if (!v) { alert('이름을 입력해주세요.'); return; }
   playerName = v;
+  towerMode = false; NUM_TEAMS = 3;
+  teams = [null,null,null];
+  currentPick = [[],[],[]]; activeTeam = 0; usedNames = new Set();
+  renderTeamArea();
   buildGrid();
   showScreen('screen-select');
   updateUI();
@@ -1344,10 +1495,31 @@ document.getElementById('btn-save').addEventListener('click', () => {
 });
 
 document.getElementById('btn-restart').addEventListener('click', () => {
-  playerName = ''; teams = [null,null,null];
+  playerName = '';
+  towerMode = false; NUM_TEAMS = 3;
+  teams = [null,null,null];
   currentPick = [[],[],[]]; activeTeam = 0; usedNames = new Set();
   document.getElementById('name-input').value = '';
+  renderTeamArea();
   showScreen('screen-name');
+});
+
+// ── 5층 탑 모드 ──
+document.getElementById('btn-tower').addEventListener('click', () => {
+  const v = document.getElementById('name-input').value.trim();
+  if (!v) { alert('이름을 입력해주세요.'); return; }
+  playerName = v;
+  towerMode  = true;
+  NUM_TEAMS  = 5;
+  MAX_SCORE  = 9999;
+  teams       = new Array(5).fill(null);
+  currentPick = Array.from({length:5}, () => []);
+  activeTeam  = 0;
+  usedNames   = new Set();
+  renderTeamArea();
+  buildGrid();
+  showScreen('screen-select');
+  updateUI();
 });
 
 // ── 캐릭터 중복 가능 토글 ──
@@ -1365,7 +1537,8 @@ window.confirmTeam = function(ti) {
   const picks = currentPick[ti];
   if (picks.length < TEAM_SIZE) return;
   teams[ti] = [...picks];
-  if (!allowDuplicate) picks.forEach(c => usedNames.add(c.name));
+  // 타워모드: 팀 간 중복 허용 → usedNames에 추가 안 함
+  if (!towerMode && !allowDuplicate) picks.forEach(c => usedNames.add(c.name));
   playSFX(sfxTeam);
   const next = teams.findIndex((t,i) => t === null && i > ti);
   if (next !== -1) { activeTeam = next; updateUI(); }
