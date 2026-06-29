@@ -37,7 +37,7 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
   border:3px solid #f0c040;
   background:#111130; color:#fff;
   border-radius:8px; outline:none;
-  width:500px; text-align:center;
+  flex:3; min-width:0; text-align:center;
 }
 #name-input:focus { border-color:#fff; box-shadow:0 0 16px #f0c040; }
 /* 버튼 공통: 5열 그리드, 크기 통일 */
@@ -46,10 +46,11 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
   gap:16px; margin-top:36px; align-items:center;
 }
 .btn-row {
-  display:flex; gap:16px;
+  display:flex; gap:12px;
+  width:1640px;
 }
 .btn-cell {
-  width:240px; height:80px;
+  flex:1; height:80px;
   font-size:22px; font-weight:bold;
   border-radius:8px; cursor:pointer;
   border:3px solid #555;
@@ -97,15 +98,16 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
 
 /* 이름 입력 행: 양옆 버튼 */
 #name-row {
-  display:flex; align-items:center; gap:20px;
+  display:flex; align-items:center; gap:12px;
+  width:1640px;
 }
 .btn-side {
-  width:180px; height:60px;
-  font-size:18px; font-weight:bold;
+  flex:1; height:60px;
+  font-size:17px; font-weight:bold;
   border-radius:8px; cursor:pointer;
   border:3px solid #4488cc;
   background:#1a1a3a; color:#aaddff;
-  transition:all 0.15s;
+  transition:all 0.15s; white-space:nowrap;
 }
 .btn-side:hover { background:#223366; border-color:#66aaff; color:#fff; }
 #btn-dup-toggle {
@@ -676,6 +678,7 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
   <!-- 화면1: 이름입력 -->
   <div id="screen-name" class="screen active">
     <div id="name-row">
+      <button class="btn-side" id="btn-tower3">3층 탑</button>
       <button class="btn-side" id="btn-tower">5층 탑</button>
       <button class="btn-side" id="btn-tournament">대회 모드</button>
       <input id="name-input" type="text" placeholder="플레이어 이름 입력" maxlength="20">
@@ -1561,7 +1564,7 @@ function saveTowerPreset() {
   }
   const name = prompt('저장할 탑 이름을 입력하세요:', `${playerName}의 탑`);
   if (!name) return;
-  presets.push({ id: Date.now(), name, playerName, teams });
+  presets.push({ id: Date.now(), name, playerName, numTeams: NUM_TEAMS, teams });
   localStorage.setItem(PRESET_KEY, JSON.stringify(presets));
   renderPresetButtons();
   alert(`"${name}" 저장 완료!`);
@@ -1602,7 +1605,7 @@ function renderPresetButtons() {
 
 function applyTowerPreset(preset) {
   towerMode   = true;
-  NUM_TEAMS   = 5;
+  NUM_TEAMS   = preset.numTeams || preset.teams.length;
   playerName  = preset.playerName;
   teams       = preset.teams;
   currentPick = Array.from({length:5}, () => []);
@@ -1615,22 +1618,24 @@ function applyTowerPreset(preset) {
 document.getElementById('btn-save-preset').addEventListener('click', saveTowerPreset);
 
 // ── 5층 탑 모드 ──
-document.getElementById('btn-tower').addEventListener('click', () => {
+function startTowerMode(numFloors) {
   const v = document.getElementById('name-input').value.trim();
   if (!v) { alert('이름을 입력해주세요.'); return; }
-  playerName = v;
-  towerMode  = true;
-  NUM_TEAMS  = 5;
-  MAX_SCORE  = 9999;
-  teams       = new Array(5).fill(null);
-  currentPick = Array.from({length:5}, () => []);
+  playerName  = v;
+  towerMode   = true;
+  NUM_TEAMS   = numFloors;
+  MAX_SCORE   = 9999;
+  teams       = new Array(numFloors).fill(null);
+  currentPick = Array.from({length:numFloors}, () => []);
   activeTeam  = 0;
   usedNames   = new Set();
   renderTeamArea();
   buildGrid();
   showScreen('screen-select');
   updateUI();
-});
+}
+document.getElementById('btn-tower').addEventListener('click',  () => startTowerMode(5));
+document.getElementById('btn-tower3').addEventListener('click', () => startTowerMode(3));
 
 // ── 캐릭터 중복 가능 토글 ──
 let allowDuplicate = false;
