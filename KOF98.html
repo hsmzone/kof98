@@ -1666,6 +1666,12 @@ const TEAM_COLOR_PRESETS = [
   '#228844', // 초록
   '#2255cc', // 파랑
   '#9922bb', // 보라
+  '#dd2288', // 핑크
+  '#00aabb', // 청록
+  '#ff6600', // 오렌지
+  '#557700', // 올리브
+  '#5533cc', // 남색
+  '#888888', // 회색
 ];
 // 라운드별 승자 라인 네온 색상 (r=0→1 이 1라운드)
 const ROUND_LINE_COLORS = ['#00ff88','#0099ff','#ff3355','#f0c040'];
@@ -1705,7 +1711,7 @@ function renderSetupInputs() {
   }
   document.getElementById('tour-team-count-val').textContent = tourTeamCount;
   document.getElementById('btn-tour-count-minus').disabled = tourTeamCount <= 2;
-  document.getElementById('btn-tour-count-plus').disabled  = tourTeamCount >= 6;
+  document.getElementById('btn-tour-count-plus').disabled  = tourTeamCount >= 8;
 }
 
 function selectTeamColor(rowIdx, el) {
@@ -1736,7 +1742,7 @@ document.getElementById('btn-tour-count-minus').addEventListener('click', ()=>{
   if(tourTeamCount>2){ tourTeamCount--; renderSetupInputs(); }
 });
 document.getElementById('btn-tour-count-plus').addEventListener('click', ()=>{
-  if(tourTeamCount<6){ tourTeamCount++; renderSetupInputs(); }
+  if(tourTeamCount<8){ tourTeamCount++; renderSetupInputs(); }
 });
 
 document.getElementById('btn-tour-setup-next').addEventListener('click', ()=>{
@@ -1886,7 +1892,7 @@ function renderRandTeamInputs(){
   const prevColors=[...ct.querySelectorAll('.tour-color-swatch.selected')].map(s=>s.dataset.color);
   ct.innerHTML='';
   // 팀 수 최대 = 참가자 수 (최소 2, 최대 6)
-  randTeamCount=Math.min(randTeamCount, randPlayers.length, 6);
+  randTeamCount=Math.min(randTeamCount, randPlayers.length, 8);
   randTeamCount=Math.max(randTeamCount, 2);
   for(let i=0;i<randTeamCount;i++){
     const defColor=prevColors[i]||TEAM_COLOR_PRESETS[i%TEAM_COLOR_PRESETS.length];
@@ -2301,7 +2307,7 @@ function startTournament(byePlayer=null){
     ticker.textContent=rulesText;
     rulesEl.style.display='block';
     // 텍스트 길이에 따라 스크롤 속도 조정
-    const speed=Math.max(80, rulesText.length*2.5);
+    const speed=(1860 + rulesText.length*20)/100;
     ticker.style.animationDuration=speed+'s';
   } else {
     rulesEl.style.display='none';
