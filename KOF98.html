@@ -438,10 +438,11 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
   margin:0; padding:0;
 }
 
-/* hover: 프레임 + 점수 */
+/* hover: 프레임 */
 .char-slot:hover:not(.used):not(.disabled) .sf         { display:block; }
-.char-slot:hover:not(.used):not(.disabled) .score-disp { display:block; }
-/* selected: 점수만 (금 테두리) */
+/* 점수: 항상 표시 */
+.char-slot:not(.disabled) .score-disp { display:block; }
+/* selected: 금 테두리 */
 .char-slot.selected .score-disp { display:block; }
 .char-slot.selected .char-img   { outline:3px solid #f0c040; outline-offset:-1px; }
 /* selected hover: 프레임 없음 유지 */
@@ -650,6 +651,34 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
 #team-member-popup .pop-member {
   font-size:15px; color:#ddeeff; padding:3px 0;
 }
+
+/* 랜덤 애니메이션 오버레이 */
+#rand-anim-overlay {
+  display:none;
+  position:absolute; inset:0;
+  background:rgba(0,0,0,0.82);
+  z-index:200;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:24px;
+}
+#rand-anim-overlay.active { display:flex; }
+.rand-anim-row {
+  display:flex; gap:16px;
+}
+.rand-anim-slot {
+  width:130px; height:130px;
+  border:3px solid #f0c040;
+  border-radius:8px;
+  overflow:hidden;
+  background:#111130;
+  display:flex; align-items:center; justify-content:center;
+}
+.rand-anim-slot img {
+  width:130px; height:130px;
+  object-fit:contain;
+}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
@@ -823,9 +852,9 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
           <div class="tf-score">점수: <span id="tf-score-0">0</span> / <span class="tf-score-max">21</span></div>
         </div>
         <div class="tf-slots" id="tfs-0">
-          <div class="tf-slot" id="ts-0-0"><span>?</span><button class="tf-remove" onclick="removeSlot(0,0)">✕</button></div>
-          <div class="tf-slot" id="ts-0-1"><span>?</span><button class="tf-remove" onclick="removeSlot(0,1)">✕</button></div>
-          <div class="tf-slot" id="ts-0-2"><span>?</span><button class="tf-remove" onclick="removeSlot(0,2)">✕</button></div>
+          <div class="tf-slot" id="ts-0-0"><span>?</span></div>
+          <div class="tf-slot" id="ts-0-1"><span>?</span></div>
+          <div class="tf-slot" id="ts-0-2"><span>?</span></div>
         </div>
         <button class="btn-confirm" id="btn-c-0" disabled onclick="confirmTeam(0)">팀 확정</button>
       </div>
@@ -835,9 +864,9 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
           <div class="tf-score">점수: <span id="tf-score-1">0</span> / <span class="tf-score-max">21</span></div>
         </div>
         <div class="tf-slots" id="tfs-1">
-          <div class="tf-slot" id="ts-1-0"><span>?</span><button class="tf-remove" onclick="removeSlot(1,0)">✕</button></div>
-          <div class="tf-slot" id="ts-1-1"><span>?</span><button class="tf-remove" onclick="removeSlot(1,1)">✕</button></div>
-          <div class="tf-slot" id="ts-1-2"><span>?</span><button class="tf-remove" onclick="removeSlot(1,2)">✕</button></div>
+          <div class="tf-slot" id="ts-1-0"><span>?</span></div>
+          <div class="tf-slot" id="ts-1-1"><span>?</span></div>
+          <div class="tf-slot" id="ts-1-2"><span>?</span></div>
         </div>
         <button class="btn-confirm" id="btn-c-1" disabled onclick="confirmTeam(1)">팀 확정</button>
       </div>
@@ -847,13 +876,20 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; }
           <div class="tf-score">점수: <span id="tf-score-2">0</span> / <span class="tf-score-max">21</span></div>
         </div>
         <div class="tf-slots" id="tfs-2">
-          <div class="tf-slot" id="ts-2-0"><span>?</span><button class="tf-remove" onclick="removeSlot(2,0)">✕</button></div>
-          <div class="tf-slot" id="ts-2-1"><span>?</span><button class="tf-remove" onclick="removeSlot(2,1)">✕</button></div>
-          <div class="tf-slot" id="ts-2-2"><span>?</span><button class="tf-remove" onclick="removeSlot(2,2)">✕</button></div>
+          <div class="tf-slot" id="ts-2-0"><span>?</span></div>
+          <div class="tf-slot" id="ts-2-1"><span>?</span></div>
+          <div class="tf-slot" id="ts-2-2"><span>?</span></div>
         </div>
         <button class="btn-confirm" id="btn-c-2" disabled onclick="confirmTeam(2)">팀 확정</button>
       </div>
     </div>
+  </div>
+
+  <!-- 랜덤 애니메이션 오버레이 -->
+  <div id="rand-anim-overlay">
+    <div class="rand-anim-row" id="rand-anim-r0"></div>
+    <div class="rand-anim-row" id="rand-anim-r1"></div>
+    <div class="rand-anim-row" id="rand-anim-r2"></div>
   </div>
 
   <!-- 화면3: 결과 -->
@@ -1016,7 +1052,11 @@ function showScreen(id) {
 
 // ── 점수 이미지 HTML ──
 function scoreHTML(score) {
-  return String(score).split('').map(d => `<img src="number/0${d}.png">`).join('');
+  const s = String(score);
+  if (s.length === 2 && parseInt(s) >= 10) {
+    return `<img src="number/${s}.png">`;
+  }
+  return s.split('').map(d => `<img src="number/0${d}.png">`).join('');
 }
 
 // ── 호버 사운드 딜레이 ──
@@ -1173,7 +1213,7 @@ function renderTeamArea() {
         <div class="tf-score">점수: <span id="tf-score-${t}">0</span>${towerMode ? '' : ` / <span class="tf-score-max">${MAX_SCORE}</span>`}</div>
       </div>
       <div class="tf-slots" id="tfs-${t}">
-        ${[0,1,2].map(si=>`<div class="tf-slot" id="ts-${t}-${si}"><span>?</span><button class="tf-remove" onclick="removeSlot(${t},${si})">✕</button></div>`).join('')}
+        ${[0,1,2].map(si=>`<div class="tf-slot" id="ts-${t}-${si}"><span>?</span></div>`).join('')}
       </div>
       <button class="btn-confirm" id="btn-c-${t}" disabled onclick="confirmTeam(${t})">팀 확정</button>
     `;
@@ -1251,9 +1291,8 @@ function renderTSlots(ti, picks, done) {
     if (char) {
       slot.classList.add(done ? 'filled-done' : 'filled');
       slot.innerHTML = `
-        <img class="tf-char-img" src="${IMG_BASE}${char.file}" alt="${char.name}">
+        <img class="tf-char-img" src="${IMG_BASE}${char.file}" alt="${char.name}"${done ? '' : ` onclick="removeSlot(${ti},${si})" style="cursor:pointer;"`}>
         <div class="tf-score-disp">${scoreHTML(char.score)}</div>
-        ${done ? '' : `<button class="tf-remove" onclick="removeSlot(${ti},${si})">✕</button>`}
       `;
     } else {
       slot.innerHTML = `<span>?</span>`;
@@ -1399,7 +1438,60 @@ function pickTeamRandom(includeVariants) {
   );
 
   usedNames = new Set(teams.flat().map(c => c.name));
-  showResult();
+  playRandAnimation(teams, showResult);
+}
+
+// ── 랜덤 슬롯머신 애니메이션 ──
+function playRandAnimation(finalTeams, callback) {
+  const overlay = document.getElementById('rand-anim-overlay');
+  const allChars = CHARS_RAW.filter(c => c.file);
+  const numTeams = finalTeams.length;
+
+  // 행 3개 준비 (팀 수만큼만 표시)
+  for (let t = 0; t < 3; t++) {
+    const row = document.getElementById(`rand-anim-r${t}`);
+    row.innerHTML = '';
+    row.style.display = t < numTeams ? 'flex' : 'none';
+    if (t < numTeams) {
+      for (let s = 0; s < 3; s++) {
+        const slot = document.createElement('div');
+        slot.className = 'rand-anim-slot';
+        slot.innerHTML = `<img src="${IMG_BASE}${allChars[0].file}">`;
+        row.appendChild(slot);
+      }
+    }
+  }
+
+  overlay.classList.add('active');
+
+  const DURATION = 1000;
+  const INTERVAL = 50;
+  const start = Date.now();
+
+  const timer = setInterval(() => {
+    const elapsed = Date.now() - start;
+    if (elapsed >= DURATION) {
+      clearInterval(timer);
+      // 최종 결과 표시
+      for (let t = 0; t < numTeams; t++) {
+        const slots = document.querySelectorAll(`#rand-anim-r${t} .rand-anim-slot img`);
+        finalTeams[t].forEach((c, s) => { if (slots[s]) slots[s].src = `${IMG_BASE}${c.file}`; });
+      }
+      setTimeout(() => {
+        overlay.classList.remove('active');
+        callback();
+      }, 300);
+      return;
+    }
+    // 랜덤 아이콘 교체
+    for (let t = 0; t < numTeams; t++) {
+      const slots = document.querySelectorAll(`#rand-anim-r${t} .rand-anim-slot img`);
+      slots.forEach(img => {
+        const c = allChars[Math.floor(Math.random() * allChars.length)];
+        img.src = `${IMG_BASE}${c.file}`;
+      });
+    }
+  }, INTERVAL);
 }
 
 document.getElementById('btn-rand-ex').addEventListener('click', () => pickTeamRandom(true));
@@ -1437,7 +1529,7 @@ function pickAllRandom(includeVariants) {
     if (ok) {
       teams = result;
       usedNames = used;
-      showResult();
+      playRandAnimation(teams, showResult);
       return;
     }
   }
