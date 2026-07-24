@@ -1144,14 +1144,38 @@ function toggleChar(char, el) {
     if (picks.length === TEAM_SIZE && picks._isRandom) {
       currentPick[ti] = [];
       currentPick[ti]._isRandom = false;
+      updateUI();
     } else {
       const result = pickRandom(ti);
       if (!result) { alert('조합 가능한 캐릭터가 없습니다.'); return; }
-      currentPick[ti] = result;
-      currentPick[ti]._isRandom = true;
       playSFX(sfxCha);
+      // 팀슬롯에서 슬롯머신 애니메이션
+      const allChars = CHARS_RAW.filter(c => c.file);
+      const DURATION = 1000, INTERVAL = 50;
+      const start = Date.now();
+      const slotEls = [0,1,2].map(si => document.getElementById(`ts-${ti}-${si}`));
+      // 슬롯 임시 채우기
+      slotEls.forEach(s => {
+        s.classList.add('filled');
+        s.innerHTML = `<img class="tf-char-img" src="${IMG_BASE}${allChars[0].file}">`;
+      });
+      const timer = setInterval(() => {
+        const elapsed = Date.now() - start;
+        if (elapsed >= DURATION) {
+          clearInterval(timer);
+          currentPick[ti] = result;
+          currentPick[ti]._isRandom = true;
+          updateUI();
+          return;
+        }
+        slotEls.forEach(s => {
+          const c = allChars[Math.floor(Math.random() * allChars.length)];
+          const img = s.querySelector('img');
+          if (img) img.src = `${IMG_BASE}${c.file}`;
+        });
+      }, INTERVAL);
     }
-    updateUI(); return;
+    return;
   }
 
   // 랜덤으로 채워진 상태면 일반 클릭 무시
